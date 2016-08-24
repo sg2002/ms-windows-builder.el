@@ -64,24 +64,31 @@
   (ewb-make)
   (ewb-make-install))
 
-(defun ewb-build-mingw64-msys ()
+(defun ewb-build-mingw64-msys2 ()
   "Build emacs using 64 bit MinGW."
-  (let ((extra-env '("MSYSTEM=MINGW64"))
-        (configuration-dir "d:/Projects/Emacs/building/mingw64-Og/")
-        (destination-dir "/c/Emacs/25-dev-mingw64/"))
-  (ewb-autogen extra-env)
-  (ewb-configure extra-env configuration-dir destination-dir)
-  (ewb-make extra-env configuration-dir)
-  (ewb-make-install extra-env configuration-dir)))
+  (ewb-build-full ewb-msys2-path '("MSYSTEM=MINGW64")
+                  "d:/Projects/Emacs/building/mingw64-Og/" "/c/Emacs/25-dev-mingw64/")
+
+  (defvar ewb-msys2-path
+    (concat "/mingw64/bin:/usr/local/bin:/usr/bin:"
+            "/bin:/c/Windows/System32:/c/Windows:"
+            "/c/Windows/System32/Wbem:/c/Windows/System32/WindowsPowerShell/v1.0/:"
+            "/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl")))
 
 (defvar ewb-emacs-source "d:/Projects/Emacs/building/repo/")
 
-(defun ewb-autogen (extra-env)
-  (ewb-command extra-env "./autogen.sh" ewb-emacs-source))
+(defun ewb-build-full (path extra-env configuration-dir destination-dir)
+  "Build emacs using 64 bit MinGW."
+  (ewb-autogen path extra-env)
+  (ewb-configure path extra-env configuration-dir destination-dir)
+  (ewb-make path extra-env configuration-dir)
+  (ewb-make-install path extra-env configuration-dir))
 
+(defun ewb-autogen (path extra-env)
+  (ewb-command path extra-env "./autogen.sh" ewb-emacs-source))
 
-(defun ewb-configure (extra-env configuration-dir prefix)
-  (ewb-command (append extra-env ewb-configure-env)
+(defun ewb-configure (path extra-env configuration-dir prefix)
+  (ewb-command path (append extra-env ewb-configure-env)
                (concat "eval " ewb-emacs-source "/configure" " \"" ewb-configure-args " --prefix=" prefix "\"")
                configuration-dir))
 
@@ -90,27 +97,28 @@
 
 (defvar ewb-configure-args "--without-imagemagick --enable-checking='yes,glyphs' --enable-check-lisp-object-type")
 
-(defun ewb-make (extra-env configuration-dir)
-  (ewb-command extra-env
+(defun ewb-make (path extra-env configuration-dir)
+  (ewb-command path extra-env
                (concat "make -j " (number-to-string ewb-make-threads))
                configuration-dir))
 
 (defvar ewb-make-threads 1)
 
-(defun ewb-make-install (extra-env configuration-dir)
-  (ewb-command extra-env
+(defun ewb-make-install (path extra-env configuration-dir)
+  (ewb-command path extra-env
                "make install"
                configuration-dir))
 
-(ewb-make-install '("MSYSTEM=MINGW64") "d:/Projects/Emacs/building/mingw64-Og/")
-
-(defun ewb-command (extra-env command dir)
-  (let ((shell-file-name "bash")
-        (process-environment (progn (setenv "PATH" "/mingw64/bin:/usr/local/bin:/usr/bin:/bin:/c/Windows/System32:/c/Windows:/c/Windows/System32/Wbem:/c/Windows/System32/WindowsPowerShell/v1.0/:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl")
-                                    ;; Default LANG may screw up automake version detection in autogen.sh
-                                    (setenv "LANG" "")
-                                    (append process-environment extra-env)))
-                             (exec-path '("C:/msys64/usr/bin/" "C:/ezwinports/bin/")))
+(defun ewb-command (path extra-env command dir)
+  (let* ((shell-file-name "bash")
+         ;; By using lexical binding we can use setenv and getenv
+         ;; on our local version of process-environment.
+         (process-environment (append process-environment extra-env))
+         (process-environment (progn (setenv "PATH" path)
+                                     ;; Default LANG may screw up automake
+                                     ;; version detection in autogen.sh.
+                                     (setenv "LANG" "")
+                                     process-environment)))
     (cd dir)
     (process-file-shell-command command nil "ewb")))
 
