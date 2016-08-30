@@ -4,29 +4,42 @@ source code.
 ** Requirements
 The only requirement is wget.  You can [[http://gnuwin32.sourceforge.net/packages/wget.htm][get it from GnuWin project]].  Or [[https://sourceforge.net/projects/ezwinports/files/wget-1.16.1-w32-bin.zip/download][from ezwinports]].
 Then either put it on PATH or put the path to it into ewb-wget-paths.
+
 Path for GnuWin version is already set up.
+
 Anything downloaded by this script using wget gets stored to
 ewb-wget-download-directory and reused if it's already there.
 
 7Zip would get installed, unless it's already present on your PATH.
 ** Usage
 Make sure that, depending on the build, ewb-mingw-directory, ewb-msys2-64-directory or ewb-msys2-32-directory is writable and ewb-emacs-source points to Emacs source repository.  Put the script on your load path and do:
+
 (require 'emacs-win-builder)
+
 Alternatively just do eval-buffer on it.
-Then use the build function. ;; Then use the build function.  For MinGW:
+
+Then use the build function.
+
+For MinGW:
+
 (ewb-build 'mingw "c:/Emacs/builds/mingw" "c:/Emacs/25-dev-mingw")
+
 For Msys2-x32:
+
 (ewb-build 'msys2-x32  "c:/Emacs/builds/msys2-x32" "c:/Emacs/25-dev-msys2-x32")
+
 For Msys2-x64:
+
 (ewb-build 'msys2-x64  "c:/Emacs/builds/msys2-x64" "c:/Emacs/25-dev-msys2-x64")
-Full build starting from the toolchain setup would take
-at least 20 minutes for MinGW and 30 minutes for Msys2.
+
+Full build starting from the toolchain setup would take at least 20 minutes for MinGW and 30 minutes for Msys2.
 *** Msys2 specific
-During msys2 setup you would get a shell window.  You can close
-it after it's done with setup and you see the command prompt.
+During msys2 setup you would get a shell window.  You can close it after it's done with setup and you see the command prompt.
 ** Known issues
 This script is completely synchronous and would freeze your Emacs session.
+
 Running it in a separate session is recommended.
+
 If you have MinGW already installed and try to use the same location, but it does not have all of the required components, this script would break.  You can manually install components into existing toolchain using (ewb-mingw-install-packages).
 For Msys it should install all packages, you can also do it manually using (ewb-msys2-install-packages).
 ** Troubleshooting
