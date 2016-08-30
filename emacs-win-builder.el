@@ -275,12 +275,12 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
     (start-process-shell-command "msys2" "ewb" (concat dir "/msys2_shell.cmd"))
     (sleep-for 30)))
 
-(defun ewb-msys2-install-packages (packages)
+(defun ewb-msys2-install-packages (exec-path path extra-env packages)
   (dolist (package packages)
-    (ewb-msys2-install-package package)))
+    (ewb-msys2-install-package exec-path path extra-env package)))
 
-(defun ewb-msys2-install-package (package)
-  (ewb-command (ewb-msys2-get-exec-path) (ewb-msys2-get-path) (ewb-msys2-get-extra-env)
+(defun ewb-msys2-install-package (exec-path path extra-env package)
+  (ewb-command exec-path path extra-env
                (concat "pacman -S --noconfirm --needed " package)))
 
 (defun ewb-windows-is-64-bit ()
@@ -319,7 +319,8 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
   ;; Need a much better check here...
   (when (not (file-exists-p (ewb-msys2-get-current-directory)))
     (ewb-msys2-install))
-  (ewb-msys2-install-packages ewb-msys2-x32-packages))
+  (ewb-msys2-install-packages (ewb-msys2-get-exec-path) (ewb-msys2-x32-get-path)
+                              (ewb-msys2-x32-get-extra-env) ewb-msys2-x32-packages))
 
 (defvar ewb-msys2-x32-packages '("base-devel" "mingw-w64-i686-toolchain"
                                  "mingw-w64-i686-xpm-nox" "mingw-w64-i686-libtiff"
@@ -347,7 +348,8 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
   ;; Need a much better check here...
   (when (not (file-exists-p ewb-msys2-x64-directory))
     (ewb-msys2-install))
-  (ewb-msys2-install-packages ewb-msys2-x64-packages))
+  (ewb-msys2-install-packages (ewb-msys2-get-exec-path) (ewb-msys2-x64-get-path)
+                              (ewb-msys2-x64-get-extra-env) ewb-msys2-x64-packages))
 
 (defvar ewb-msys2-x64-packages '("base-devel" "mingw-w64-x86_64-toolchain"
                                  "mingw-w64-x86_64-xpm-nox" "mingw-w64-x86_64-libtiff"
