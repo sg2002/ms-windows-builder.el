@@ -36,14 +36,17 @@
 ;; 7Zip would get installed, unless it's already present on your PATH.
 
 ;; Usage:
-;; Make sure that ewb-mingw-directory, ewb-msys2-64-directory or
-;; ewb-msys2-32-directory is writable and ewb-emacs-source points to
-;; Emacs source repository.  Put the script on your load path and do:
+;; Make sure that depending on the build  ewb-mingw-directory,
+;; ewb-msys2-x64-directory orewb-msys2-x32-directory is writable
+;; and ewb-emacs-source points to Emacs source repository.
+;; Put the script on your load path and do:
 ;; (require 'emacs-win-builder)
 ;; Alternatively just do eval-buffer on it.
 ;; Then use the build function.  For MinGW:
 ;; (ewb-build 'mingw "c:/Emacs/builds/mingw" "c:/Emacs/25-dev-mingw")
-;; For Msys2:
+;; For Msys2-x32:
+;; (ewb-build 'msys2-x32  "c:/Emacs/builds/msys2-x32" "c:/Emacs/25-dev-msys2-x32")
+;; For Msys2-x64:
 ;; (ewb-build 'msys2-x64  "c:/Emacs/builds/msys2-x64" "c:/Emacs/25-dev-msys2-x64")
 ;; Full build starting from the toolchain setup would take
 ;; at least 20 minutes for MinGW and 30 minutes for Msys2.
@@ -55,10 +58,11 @@
 ;; Known issues:
 ;; This script is completely synchronous and would freeze your Emacs session.
 ;; Running it in a separate session is recommended.
-;; If you have a toolchain(MinGW or msys2) already installed, but it does not
-;; have all the required components, this script would break.  You can manually
-;; install components into existing toolchain using (ewb-msys2-install-packages)
-;; for msys2 and (ewb-mingw-install-packages) for MinGW.
+;; If you have MinGW already installed and try to use the same location, but it does not
+;; have all of the required components, this script would break.  You can manually
+;; install components into existing toolchain using (ewb-mingw-install-packages).
+;; For Msys it should install all packages, you can also do it manually using
+;; (ewb-msys2-install-packages).
 
 ;; Troubleshooting:
 ;; All output gets saved to "ewb" buffer.
@@ -74,11 +78,11 @@
 (defun ewb-build (selected-build make-path output-path)
   "Build Emacs using SELECTED-BUILD, which should be defined in ewb-builds. Run
 configure and make in MAKE-PATH. Install Emacs into OUTPUT-PATH."
-  (let ((build-definition (cadr (assoc build ewb-builds))))
-    (funcall (cadr (assoc 'ensure-fn build-definition)))
-    (ewb-build-full (funcall (cadr (assoc 'get-exec-path-fn build-definition)))
-                    (funcall (cadr (assoc 'get-path-fn build-definition)))
-                    (funcall (cadr (assoc 'get-extra-env-fn build-definition)))
+  (let ((build (cadr (assoc selected-build ewb-builds))))
+    (funcall (cadr (assoc 'ensure-fn build)))
+    (ewb-build-full (funcall (cadr (assoc 'get-exec-path-fn build)))
+                    (funcall (cadr (assoc 'get-path-fn build)))
+                    (funcall (cadr (assoc 'get-extra-env-fn build)))
                     make-path output-path)))
 
 (defvar ewb-builds
@@ -86,14 +90,17 @@ configure and make in MAKE-PATH. Install Emacs into OUTPUT-PATH."
             (get-exec-path-fn ewb-mingw-get-exec-path)
             (get-path-fn ewb-mingw-get-path)
             (get-extra-env-fn ewb-mingw-get-extra-env)))
-    (msys2-x64 ((ensure-fn ewb-msys2-ensure)
+    (msys2-x32 ((ensure-fn ewb-msys2-x32-ensure)
                 (get-exec-path-fn ewb-msys2-get-exec-path)
-                (get-path-fn ewb-msys2-get-path)
-                (get-extra-env-fn ewb-msys2-get-extra-env))))
-  "List of possbile builds used to build Emacs.")
+                (get-path-fn ewb-msys2-x32-get-path)
+                (get-extra-env-fn ewb-msys2-x32-get-extra-env)))
+    (msys2-x64 ((ensure-fn ewb-msys2-x64-ensure)
+                (get-exec-path-fn ewb-msys2-get-exec-path)
+                (get-path-fn ewb-msys2-x64-get-path)
+                (get-extra-env-fn ewb-msys2-x64-get-extra-env))))
+  "List of possbile builds for building Emacs.")
 
 ;; * Generic builder
-
 (defun ewb-build-full (exec-path path extra-env configuration-dir destination-dir)
   "Build Emacs in CONFIGURATION-DIR from sources in ewb-emacs-source and install
 it into DESTINATION-DIR.  EXEC-PATH, PATH and EXTRA-ENV would eventually get passed
@@ -153,7 +160,6 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
     (process-file-shell-command command nil "ewb")))
 
 ;; * MinGW
-
 (defcustom ewb-mingw-directory "c:/Emacs/MinGW"
   "* Place to check for MinGW and install it if it's not present."
   :group 'ewb
@@ -255,65 +261,104 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
 
 
 ;; * Msys2
-
-(defcustom ewb-msys2-directory "c:/Emacs/msys64"
-  "* Place to check for MinGW and install it if it's not present."
-  :group 'ewb
-  :type 'directory)
-
-(defun ewb-msys2-get-exec-path ()
-    (list (concat ewb-msys2-directory "/usr/bin/")))
-
-(defun ewb-msys2-get-path ()
-  (concat "/mingw64/bin:/usr/local/bin:/usr/bin:"
-          "/bin:/c/Windows/System32:/c/Windows:"
-          "/c/Windows/System32/Wbem:/c/Windows/System32/WindowsPowerShell/v1.0/:"
-          "/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/"))
-
-(defun ewb-msys2-get-extra-env ()
-  '("MSYSTEM=MINGW64" "PKG_CONFIG_PATH=/mingw64/lib/pkgconfig"))
-
-(defun ewb-msys2-ensure ()
-  ;; Need a much better check here...
-  (when (not (file-exists-p ewb-msys2-directory))
-    (ewb-msys2-install)
-    (ewb-msys2-install-packages)))
+(defcustom ewb-msys2-x32-force nil
+  "Forcefully install 32 bit version of msys2 on 64 it machines."
+  :group 'ewb)
 
 (defun ewb-msys2-install ()
-  (ewb-7z-extract (ewb-wget-download-file (if (ewb-windows-is-64-bit)
-                                      ewb-msys2-x64-dist
-                                      ewb-msys2-x32-dist))
-                  (mapconcat 'identity (butlast (split-string ewb-msys2-directory "/")) "/") t)
-  (start-process-shell-command "msys2" "ewb" (concat ewb-msys2-directory "/msys2_shell.cmd"))
-  (sleep-for 30))
+  (let* ((install-x32 (if (or ewb-msys2-x32-force
+                             (not (ewb-windows-is-64-bit))) t nil))
+         (dir (if install-x32 ewb-msys2-x32-directory ewb-msys2-x64-directory))
+         (dist (if install-x32 ewb-msys2-x32-dist ewb-msys2-x64-dist)))
+    (ewb-7z-extract (ewb-wget-download-file dist)
+                    (mapconcat 'identity (butlast (split-string dir "/")) "/") t)
+    (start-process-shell-command "msys2" "ewb" (concat dir "/msys2_shell.cmd"))
+    (sleep-for 30)))
 
-(defvar ewb-msys2-x32-dist
-  "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20160719.tar.xz/download")
-
-(defvar ewb-msys2-x64-dist
-  "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20160719.tar.xz/download")
-
-(defun ewb-msys2-install-packages ()
-  (dolist (package ewb-msys2-packages)
+(defun ewb-msys2-install-packages (packages)
+  (dolist (package packages)
     (ewb-msys2-install-package package)))
 
 (defun ewb-msys2-install-package (package)
   (ewb-command (ewb-msys2-get-exec-path) (ewb-msys2-get-path) (ewb-msys2-get-extra-env)
                (concat "pacman -S --noconfirm --needed " package)))
 
-(defvar ewb-msys2-packages '("base-devel" "mingw-w64-x86_64-toolchain"
-                             "mingw-w64-x86_64-xpm-nox" "mingw-w64-x86_64-libtiff"
-                             "mingw-w64-x86_64-giflib" "mingw-w64-x86_64-libpng"
-                             "mingw-w64-x86_64-libjpeg-turbo" "mingw-w64-x86_64-librsvg"
-                             "mingw-w64-x86_64-libxml2" "mingw-w64-x86_64-gnutls"))
-
 (defun ewb-windows-is-64-bit ()
   "Determines whether Windows is 64 bit."
   ;; HACK, but should generally work.
   (file-exists-p "c:/Program Files (x86)/"))
 
-;; * 7zip
+(defun ewb-msys2-get-common-path ()
+  (concat "/usr/local/bin:/usr/bin:"
+          "/bin:/c/Windows/System32:/c/Windows:"
+          "/c/Windows/System32/Wbem:/c/Windows/System32/WindowsPowerShell/v1.0/:"
+          "/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/"))
 
+(defun ewb-msys2-get-exec-path ()
+  (list (concat (ewb-msys2-get-current-directory)  "/usr/bin/")))
+
+(defun ewb-msys2-get-current-directory ()
+  "Return directory for currently installed msys"
+  (if (or ewb-msys2-x32-force
+          (not (ewb-windows-is-64-bit))) ewb-msys2-x32-directory
+    ewb-msys2-x64-directory))
+
+;; ** x32
+(defcustom ewb-msys2-x32-directory "c:/Emacs/msys32"
+  "* Place to check for 32 bit msys2 and install it if it's not present."
+  :group 'ewb
+  :type 'directory)
+
+(defun ewb-msys2-x32-get-path ()
+  (concat "/mingw32/bin:" (ewb-msys2-get-common-path)))
+
+(defun ewb-msys2-x32-get-extra-env ()
+  '("MSYSTEM=MINGW32" "PKG_CONFIG_PATH=/mingw32/lib/pkgconfig"))
+
+(defun ewb-msys2-x32-ensure ()
+  ;; Need a much better check here...
+  (when (not (file-exists-p (ewb-msys2-get-current-directory)))
+    (ewb-msys2-install))
+  (ewb-msys2-install-packages ewb-msys2-x32-packages))
+
+(defvar ewb-msys2-x32-packages '("base-devel" "mingw-w64-i686-toolchain"
+                                 "mingw-w64-i686-xpm-nox" "mingw-w64-i686-libtiff"
+                                 "mingw-w64-i686-giflib" "mingw-w64-i686-libpng"
+                                 "mingw-w64-i686-libjpeg-turbo" "mingw-w64-i686-librsvg"
+                                 "mingw-w64-i686-libxml2" "mingw-w64-i686-gnutls"))
+
+(defvar ewb-msys2-x32-dist
+  "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20160719.tar.xz/download")
+
+;; ** x64
+(defcustom ewb-msys2-x64-directory "c:/Emacs/msys64"
+  "* Place to check for MinGW and install it if it's not present."
+  :group 'ewb
+  :type 'directory)
+
+(defun ewb-msys2-x64-get-path ()
+  (concat "/mingw64/bin:" (ewb-msys2-get-common-path)))
+
+
+(defun ewb-msys2-x64-get-extra-env ()
+  '("MSYSTEM=MINGW64" "PKG_CONFIG_PATH=/mingw64/lib/pkgconfig"))
+
+(defun ewb-msys2-x64-ensure ()
+  ;; Need a much better check here...
+  (when (not (file-exists-p ewb-msys2-x64-directory))
+    (ewb-msys2-install))
+  (ewb-msys2-install-packages ewb-msys2-x64-packages))
+
+(defvar ewb-msys2-x64-packages '("base-devel" "mingw-w64-x86_64-toolchain"
+                                 "mingw-w64-x86_64-xpm-nox" "mingw-w64-x86_64-libtiff"
+                                 "mingw-w64-x86_64-giflib" "mingw-w64-x86_64-libpng"
+                                 "mingw-w64-x86_64-libjpeg-turbo" "mingw-w64-x86_64-librsvg"
+                                 "mingw-w64-x86_64-libxml2" "mingw-w64-x86_64-gnutls"))
+
+(defvar ewb-msys2-x64-dist
+  "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20160719.tar.xz/download")
+
+;; * 7zip
 (defun ewb-7z-extract (file path &optional keep)
   "Recursively extracts archives."
   (let* ((file-list (reverse (split-string file "\\.")))
@@ -355,7 +400,6 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
 (defvar ewb-7z-x32-setup "http://www.7-zip.org/a/7z1602.exe")
 
 ;; * Wget
-
 (defun ewb-wget-download-file (file)
   (let* ((file-tokens (reverse (split-string file "/")))
          ;; Sourceforge filenames have "download" at the end.
