@@ -13,25 +13,26 @@ ewb-wget-download-directory and reused if it's already there.
 7Zip would get installed, unless it's already present on your PATH.
 ** Usage
 Make sure that, depending on the build, ewb-mingw-directory, ewb-msys2-64-directory or ewb-msys2-32-directory is writable and ewb-emacs-source points to Emacs source repository.  Put the script on your load path and do:
-
+#+BEGIN_SRC emacs-lisp
 (require 'emacs-win-builder)
-
+#+end_src
 Alternatively just do eval-buffer on it.
 
 Then use the build function.
 
 For MinGW:
-
+#+BEGIN_SRC emacs-lisp
 (ewb-build 'mingw "c:/Emacs/builds/mingw" "c:/Emacs/25-dev-mingw")
-
+#+end_src
 For Msys2-x32:
-
+#+BEGIN_SRC emacs-lisp
 (ewb-build 'msys2-x32  "c:/Emacs/builds/msys2-x32" "c:/Emacs/25-dev-msys2-x32")
+#+end_src
 
 For Msys2-x64:
-
+#+BEGIN_SRC emacs-lisp
 (ewb-build 'msys2-x64  "c:/Emacs/builds/msys2-x64" "c:/Emacs/25-dev-msys2-x64")
-
+#+end_src
 Full build starting from the toolchain setup would take at least 20 minutes for MinGW and 30 minutes for Msys2.
 *** Msys2 specific
 During msys2 setup you would get a shell window.  You can close it after it's done with setup and you see the command prompt.
