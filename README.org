@@ -1,20 +1,20 @@
-* emacs-win-builder
+* windows-builder.el
 This script installs the required tools and then builds Emacs from the
 source code.
 ** Requirements
 The only requirement is wget.  You can [[http://gnuwin32.sourceforge.net/packages/wget.htm][get it from GnuWin project]].  Or [[https://sourceforge.net/projects/ezwinports/files/wget-1.16.1-w32-bin.zip/download][from ezwinports]].
-Then either put it on PATH or put the path to it into ewb-wget-paths.
+Then either put it on PATH or put the path to it into wb-wget-paths.
 
 Path for GnuWin version is already set up.
 
 Anything downloaded by this script using wget gets stored to
-ewb-wget-download-directory and reused if it's already there.
+wb-wget-download-directory and reused if it's already there.
 
 7Zip would get installed, unless it's already present on your PATH.
 ** Usage
-Make sure that, depending on the build, ewb-mingw-directory, ewb-msys2-64-directory or ewb-msys2-32-directory is writable and ewb-emacs-source points to Emacs source repository.  Put the script on your load path and do:
+Make sure that, depending on the build, wb-mingw-directory, wb-msys2-64-directory or wb-msys2-32-directory is writable and wb-emacs-source points to Emacs source repository.  Put the script on your load path and do:
 #+BEGIN_SRC emacs-lisp
-(require 'emacs-win-builder)
+(require 'windows-builder)
 #+end_src
 Alternatively just do eval-buffer on it.
 
@@ -22,16 +22,16 @@ Then use the build function.
 
 For MinGW:
 #+BEGIN_SRC emacs-lisp
-(ewb-build 'mingw "c:/Emacs/builds/mingw" "c:/Emacs/25-dev-mingw")
+(wb-build 'mingw "c:/Emacs/builds/mingw" "c:/Emacs/25-dev-mingw")
 #+end_src
 For Msys2-x32:
 #+BEGIN_SRC emacs-lisp
-(ewb-build 'msys2-x32  "c:/Emacs/builds/msys2-x32" "c:/Emacs/25-dev-msys2-x32")
+(wb-build 'msys2-x32  "c:/Emacs/builds/msys2-x32" "c:/Emacs/25-dev-msys2-x32")
 #+end_src
 
 For Msys2-x64:
 #+BEGIN_SRC emacs-lisp
-(ewb-build 'msys2-x64  "c:/Emacs/builds/msys2-x64" "c:/Emacs/25-dev-msys2-x64")
+(wb-build 'msys2-x64  "c:/Emacs/builds/msys2-x64" "c:/Emacs/25-dev-msys2-x64")
 #+end_src
 Full build starting from the toolchain setup would take at least 20 minutes for MinGW and 30 minutes for Msys2.
 *** Msys2 specific
@@ -41,7 +41,7 @@ This script is completely synchronous and would freeze your Emacs session.
 
 Running it in a separate session is recommended.
 
-If you have MinGW already installed and try to use the same location, but it does not have all of the required components, this script would break.  You can manually install components into existing toolchain using (ewb-mingw-install-packages).
-For Msys it should install all packages, you can also do it manually using (ewb-msys2-install-packages).
+If you have MinGW already installed and try to use the same location, but it does not have all of the required components, this script would break.  You can manually install components into existing toolchain using (wb-mingw-install-packages).
+For Msys it should install all packages, you can also do it manually using (wb-msys2-install-packages).
 ** Troubleshooting
-All output gets saved to "ewb" buffer.
+All output gets saved to "wb" buffer.
