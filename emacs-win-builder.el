@@ -204,60 +204,60 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
   (ewb-7z-extract (ewb-wget-download-file package) path t))
 
 (defvar ewb-mingw-packages
-  '("https://sourceforge.net/projects/mingw/files/MinGW/Base/binutils/binutils-2.25.1/binutils-2.25.1-1-mingw32-bin.tar.xz/download"
-    "https://sourceforge.net/projects/mingw/files/MinGW/Base/mingwrt/mingwrt-3.22/mingwrt-3.22.1-mingw32-dev.tar.xz/download"
-    "https://sourceforge.net/projects/mingw/files/MinGW/Base/mingwrt/mingwrt-3.22/mingwrt-3.22.1-mingw32-dll.tar.xz/download"
-    "https://sourceforge.net/projects/mingw/files/MinGW/Base/w32api/w32api-3.18/w32api-3.18.1-mingw32-dev.tar.xz/download"
-    "https://sourceforge.net/projects/mingw/files/MinGW/Base/mpc/mpc-1.0.2/libmpc-1.0.2-mingw32-dll-3.tar.xz/download"
-    "https://sourceforge.net/projects/mingw/files/MinGW/Base/mpfr/mpfr-3.1.2-2/mpfr-3.1.2-2-mingw32-dll.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MinGW/Base/gmp/gmp-5.1.2/gmp-5.1.2-1-mingw32-dll.tar.lzma/download"
+  '("https://sourceforge.net/projects/mingw/files/MinGW/Base/binutils/binutils-2.25.1/binutils-2.25.1-1-mingw32-bin.tar.xz"
+    "https://sourceforge.net/projects/mingw/files/MinGW/Base/mingwrt/mingwrt-3.22/mingwrt-3.22.1-mingw32-dev.tar.xz"
+    "https://sourceforge.net/projects/mingw/files/MinGW/Base/mingwrt/mingwrt-3.22/mingwrt-3.22.1-mingw32-dll.tar.xz"
+    "https://sourceforge.net/projects/mingw/files/MinGW/Base/w32api/w32api-3.18/w32api-3.18.1-mingw32-dev.tar.xz"
+    "https://sourceforge.net/projects/mingw/files/MinGW/Base/mpc/mpc-1.0.2/libmpc-1.0.2-mingw32-dll-3.tar.xz"
+    "https://sourceforge.net/projects/mingw/files/MinGW/Base/mpfr/mpfr-3.1.2-2/mpfr-3.1.2-2-mingw32-dll.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MinGW/Base/gmp/gmp-5.1.2/gmp-5.1.2-1-mingw32-dll.tar.lzma"
     ;; Pthreads is no longer required by gcc and does not get installed with it by mingw-get, but it's still required by ld.
-    "https://sourceforge.net/projects/mingw/files/MinGW/Base/pthreads-w32/pthreads-w32-2.9.1/pthreads-w32-2.9.1-1-mingw32-dll.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MinGW/Base/pthreads-w32/pthreads-w32-2.9.1/pthreads-w32-2.9.1-1-mingw32-dev.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MinGW/Base/gettext/gettext-0.18.3.2-2/gettext-0.18.3.2-2-mingw32-dev.tar.xz/download"
-    "https://sourceforge.net/projects/mingw/files/MinGW/Base/gcc/Version5/gcc-5.3.0-2/gcc-core-5.3.0-2-mingw32-bin.tar.xz/download"
-    "https://sourceforge.net/projects/ezwinports/files/pkg-config-0.28-w32-bin.zip/download"
+    "https://sourceforge.net/projects/mingw/files/MinGW/Base/pthreads-w32/pthreads-w32-2.9.1/pthreads-w32-2.9.1-1-mingw32-dll.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MinGW/Base/pthreads-w32/pthreads-w32-2.9.1/pthreads-w32-2.9.1-1-mingw32-dev.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MinGW/Base/gettext/gettext-0.18.3.2-2/gettext-0.18.3.2-2-mingw32-dev.tar.xz"
+    "https://sourceforge.net/projects/mingw/files/MinGW/Base/gcc/Version5/gcc-5.3.0-2/gcc-core-5.3.0-2-mingw32-bin.tar.xz"
+    "https://sourceforge.net/projects/ezwinports/files/pkg-config-0.28-w32-bin.zip"
     ;; gnutls dependencies start
-    "https://sourceforge.net/projects/ezwinports/files/p11-kit-0.9-w32-bin.zip/download"
-    "https://sourceforge.net/projects/ezwinports/files/libtasn1-4.2-w32-bin.zip/download"
-    "https://sourceforge.net/projects/ezwinports/files/nettle-2.7.1-w32-bin.zip/download"
-    "https://sourceforge.net/projects/ezwinports/files/zlib-1.2.8-2-w32-bin.zip/download"
+    "https://sourceforge.net/projects/ezwinports/files/p11-kit-0.9-w32-bin.zip"
+    "https://sourceforge.net/projects/ezwinports/files/libtasn1-4.2-w32-bin.zip"
+    "https://sourceforge.net/projects/ezwinports/files/nettle-2.7.1-w32-bin.zip"
+    "https://sourceforge.net/projects/ezwinports/files/zlib-1.2.8-2-w32-bin.zip"
     ;; gnutls dependencies end
-    "https://sourceforge.net/projects/ezwinports/files/gnutls-3.3.11-w32-bin.zip/download"))
+    "https://sourceforge.net/projects/ezwinports/files/gnutls-3.3.11-w32-bin.zip"))
 
 (defvar ewb-msys-packages
-  '("https://sourceforge.net/projects/mingw/files/MSYS/Base/msys-core/msys-1.0.19-1/msysCORE-1.0.19-1-msys-1.0.19-bin.tar.xz/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/bash/bash-3.1.23-1/bash-3.1.23-1-msys-1.0.18-bin.tar.xz/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/gettext/gettext-0.18.1.1-1/libintl-0.18.1.1-1-msys-1.0.17-dll-8.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/libiconv/libiconv-1.14-1/libiconv-1.14-1-msys-1.0.17-dll-2.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/xz/xz-5.0.3-1/liblzma-5.0.3-1-msys-1.0.17-dll-5.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/xz/xz-5.0.3-1/xz-5.0.3-1-msys-1.0.17-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/bzip2/bzip2-1.0.6-1/libbz2-1.0.6-1-msys-1.0.17-dll-1.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/bzip2/bzip2-1.0.6-1/bzip2-1.0.6-1-msys-1.0.17-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/make/make-3.81-3/make-3.81-3-msys-1.0.13-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/coreutils/coreutils-5.97-3/coreutils-5.97-3-msys-1.0.13-ext.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/coreutils/coreutils-5.97-3/coreutils-5.97-3-msys-1.0.13-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/findutils/findutils-4.4.2-2/findutils-4.4.2-2-msys-1.0.13-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/diffutils/diffutils-2.8.7.20071206cvs-3/diffutils-2.8.7.20071206cvs-3-msys-1.0.13-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/tar/tar-1.23-1/tar-1.23-1-msys-1.0.13-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/less/less-436-2/less-436-2-msys-1.0.13-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/gawk/gawk-3.1.7-2/gawk-3.1.7-2-msys-1.0.13-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/gzip/gzip-1.3.12-2/gzip-1.3.12-2-msys-1.0.13-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/grep/grep-2.5.4-2/grep-2.5.4-2-msys-1.0.13-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/file/file-5.04-1/libmagic-5.04-1-msys-1.0.13-dll-1.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/file/file-5.04-1/file-5.04-1-msys-1.0.13-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/sed/sed-4.2.1-2/sed-4.2.1-2-msys-1.0.13-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/regex/regex-1.20090805-2/libregex-1.20090805-2-msys-1.0.13-dll-1.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/termcap/termcap-0.20050421_1-2/termcap-0.20050421_1-2-msys-1.0.13-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Base/termcap/termcap-0.20050421_1-2/libtermcap-0.20050421_1-2-msys-1.0.13-dll-0.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Extension/flex/flex-2.5.35-2/flex-2.5.35-2-msys-1.0.13-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Extension/bison/bison-2.4.2-1/bison-2.4.2-1-msys-1.0.13-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Extension/m4/m4-1.4.16-2/m4-1.4.16-2-msys-1.0.17-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Extension/perl/perl-5.8.8-1/perl-5.8.8-1-msys-1.0.17-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/mingw/files/MSYS/Extension/mktemp/mktemp-1.6-2/mktemp-1.6-2-msys-1.0.13-bin.tar.lzma/download"
-    "https://sourceforge.net/projects/ezwinports/files/automake-1.11.6-msys-bin.zip/download"
-    "https://sourceforge.net/projects/ezwinports/files/autoconf-2.65-msys-bin.zip/download"
-    "https://sourceforge.net/projects/ezwinports/files/texinfo-6.1-w32-bin.zip/download"))
+  '("https://sourceforge.net/projects/mingw/files/MSYS/Base/msys-core/msys-1.0.19-1/msysCORE-1.0.19-1-msys-1.0.19-bin.tar.xz"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/bash/bash-3.1.23-1/bash-3.1.23-1-msys-1.0.18-bin.tar.xz"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/gettext/gettext-0.18.1.1-1/libintl-0.18.1.1-1-msys-1.0.17-dll-8.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/libiconv/libiconv-1.14-1/libiconv-1.14-1-msys-1.0.17-dll-2.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/xz/xz-5.0.3-1/liblzma-5.0.3-1-msys-1.0.17-dll-5.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/xz/xz-5.0.3-1/xz-5.0.3-1-msys-1.0.17-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/bzip2/bzip2-1.0.6-1/libbz2-1.0.6-1-msys-1.0.17-dll-1.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/bzip2/bzip2-1.0.6-1/bzip2-1.0.6-1-msys-1.0.17-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/make/make-3.81-3/make-3.81-3-msys-1.0.13-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/coreutils/coreutils-5.97-3/coreutils-5.97-3-msys-1.0.13-ext.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/coreutils/coreutils-5.97-3/coreutils-5.97-3-msys-1.0.13-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/findutils/findutils-4.4.2-2/findutils-4.4.2-2-msys-1.0.13-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/diffutils/diffutils-2.8.7.20071206cvs-3/diffutils-2.8.7.20071206cvs-3-msys-1.0.13-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/tar/tar-1.23-1/tar-1.23-1-msys-1.0.13-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/less/less-436-2/less-436-2-msys-1.0.13-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/gawk/gawk-3.1.7-2/gawk-3.1.7-2-msys-1.0.13-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/gzip/gzip-1.3.12-2/gzip-1.3.12-2-msys-1.0.13-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/grep/grep-2.5.4-2/grep-2.5.4-2-msys-1.0.13-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/file/file-5.04-1/libmagic-5.04-1-msys-1.0.13-dll-1.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/file/file-5.04-1/file-5.04-1-msys-1.0.13-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/sed/sed-4.2.1-2/sed-4.2.1-2-msys-1.0.13-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/regex/regex-1.20090805-2/libregex-1.20090805-2-msys-1.0.13-dll-1.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/termcap/termcap-0.20050421_1-2/termcap-0.20050421_1-2-msys-1.0.13-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Base/termcap/termcap-0.20050421_1-2/libtermcap-0.20050421_1-2-msys-1.0.13-dll-0.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Extension/flex/flex-2.5.35-2/flex-2.5.35-2-msys-1.0.13-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Extension/bison/bison-2.4.2-1/bison-2.4.2-1-msys-1.0.13-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Extension/m4/m4-1.4.16-2/m4-1.4.16-2-msys-1.0.17-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Extension/perl/perl-5.8.8-1/perl-5.8.8-1-msys-1.0.17-bin.tar.lzma"
+    "https://sourceforge.net/projects/mingw/files/MSYS/Extension/mktemp/mktemp-1.6-2/mktemp-1.6-2-msys-1.0.13-bin.tar.lzma"
+    "https://sourceforge.net/projects/ezwinports/files/automake-1.11.6-msys-bin.zip"
+    "https://sourceforge.net/projects/ezwinports/files/autoconf-2.65-msys-bin.zip"
+    "https://sourceforge.net/projects/ezwinports/files/texinfo-6.1-w32-bin.zip"))
 
 
 ;; * Msys2
@@ -329,7 +329,7 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
                                  "mingw-w64-i686-libxml2" "mingw-w64-i686-gnutls"))
 
 (defvar ewb-msys2-x32-dist
-  "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20160719.tar.xz/download")
+  "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20160719.tar.xz")
 
 ;; ** x64
 (defcustom ewb-msys2-x64-directory "c:/Emacs/msys64"
@@ -358,7 +358,7 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
                                  "mingw-w64-x86_64-libxml2" "mingw-w64-x86_64-gnutls"))
 
 (defvar ewb-msys2-x64-dist
-  "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20160719.tar.xz/download")
+  "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20160719.tar.xz")
 
 ;; * 7zip
 (defun ewb-7z-extract (file path &optional keep)
@@ -403,35 +403,35 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
 
 ;; * Wget
 (defun ewb-wget-download-file (file)
-  (let* ((file-tokens (reverse (split-string file "/")))
-         ;; Sourceforge filenames have "download" at the end.
-         (file-name (if (equal "download" (car file-tokens))
-                        (cadr file-tokens)
-                        (car file-tokens)))
-         (local-file (concat ewb-wget-download-directory "/" file-name)))
+  (let* ((local-file (concat ewb-wget-download-directory "/"
+                             (car (reverse (split-string file "/")))))
+         (wget (ewb-get-wget))
+         (check-certificate (if (ewb-wget-check-certificate)
+                                "--no-check-certificate" "")))
     (when (not (file-exists-p local-file))
       (when (not (file-exists-p ewb-wget-download-directory))
         (mkdir ewb-wget-download-directory t))
       (cd ewb-wget-download-directory)
-      (process-file-shell-command (concat "\"" (ewb-get-wget) "\" --no-check-certificate " file
-                                          ;; ezwinports version of wget needs -O flag
-                                          ;; otherwise it saves files as "download"
-                                          " -O" file-name) nil "ewb"))
+      (process-file-shell-command
+       (concat "\"" wget
+               "\" " check-certificate " " file) nil "ewb"))
     local-file))
 
-(defun ewb-get-wget ()
+(defun ewb-wget-get ()
   "Ensure we have wget on our path for downloading dependencies.
 Wget works nicely, since it's able to get stuff from sourceforge."
   (let ((wget (or (executable-find "wget.exe")
               (locate-file "wget.exe" ewb-wget-paths)
               (error "Wget not found."))))
-    (when (string-match "GnuWin32" wget)
-      (setq ewb-wget-no-check-certificate t))
     wget))
 
-(defvar ewb-wget-no-check-certificate nil
-  "Pass --no-check-certificate flag to wget.
-Needed for GnuWin version, because it fails for https.")
+(defun ewb-wget-check-certificate ()
+  "Whether to pass --no-check-certificate flag to wget.
+Needed for GnuWin version, because it fails for https."
+  (let ((wget (ewb-wget-get)))
+    (if (string-match "GnuWin32" wget)
+        t
+      nil)))
 
 (defcustom ewb-wget-paths '("c:/Program Files (x86)/GnuWin32/bin/" "c:/Program Files/GnuWin32/bin/")
   "*Paths to search for wget."
