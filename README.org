@@ -21,16 +21,16 @@ Then use the build function.
 
 For MinGW:
 #+BEGIN_SRC emacs-lisp
-(mwb-build 'mingw "c:/Emacs/builds/mingw" "c:/Emacs/25-dev-mingw")
+(mwb-build 'mingw "c:/Emacs/configs/mingw" "c:/Emacs/25-dev-mingw")
 #+end_src
 For Msys2-x32:
 #+BEGIN_SRC emacs-lisp
-(mwb-build 'msys2-x32  "c:/Emacs/builds/msys2-x32" "c:/Emacs/25-dev-msys2-x32")
+(mwb-build 'msys2-x32  "c:/Emacs/configs/msys2-x32" "c:/Emacs/25-dev-msys2-x32")
 #+end_src
 
 For Msys2-x64:
 #+BEGIN_SRC emacs-lisp
-(mwb-build 'msys2-x64  "c:/Emacs/builds/msys2-x64" "c:/Emacs/25-dev-msys2-x64")
+(mwb-build 'msys2-x64  "c:/Emacs/configs/msys2-x64" "c:/Emacs/25-dev-msys2-x64")
 #+end_src
 Full build starting from the toolchain setup would take at least 20 minutes for MinGW and 30 minutes for Msys2.
 *** Msys2 specific

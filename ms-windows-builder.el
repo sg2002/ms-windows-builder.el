@@ -42,11 +42,11 @@
 ;; Put the script on your load path and do:
 ;; (require 'ms-windows-builder)
 ;; Then use the build function.  For MinGW:
-;; (mwb-build 'mingw "c:/Emacs/builds/mingw" "c:/Emacs/25-dev-mingw")
+;; (mwb-build 'mingw "c:/Emacs/configs/mingw" "c:/Emacs/25-dev-mingw")
 ;; For Msys2-x32:
-;; (mwb-build 'msys2-x32  "c:/Emacs/builds/msys2-x32" "c:/Emacs/25-dev-msys2-x32")
+;; (mwb-build 'msys2-x32  "c:/Emacs/configs/msys2-x32" "c:/Emacs/25-dev-msys2-x32")
 ;; For Msys2-x64:
-;; (mwb-build 'msys2-x64  "c:/Emacs/builds/msys2-x64" "c:/Emacs/25-dev-msys2-x64")
+;; (mwb-build 'msys2-x64  "c:/Emacs/configs/msys2-x64" "c:/Emacs/25-dev-msys2-x64")
 ;; Full build starting from the toolchain setup would take
 ;; at least 20 minutes for MinGW and 30 minutes for Msys2.
 
@@ -72,54 +72,44 @@
 (require 'ms-windows-builder-config)
 
 ;; * Main
-(defcustom mwb-emacs-source "c:/Emacs/source"
-  "*Directory that contains Emacs source code."
-  :group 'mwb
-  :type 'directory)
-
-(defun mwb-build (selected-build make-path output-path)
+(defun mwb-build (selected-toolchain make-path output-path &optional configuration)
   "Build Emacs using SELECTED-BUILD, which should be defined in mwb-builds. Run
 configure and make in MAKE-PATH. Install Emacs into OUTPUT-PATH."
-  (let ((build (cadr (assoc selected-build mwb-builds))))
-    (funcall (cadr (assoc 'ensure-fn build)))
-    (mwb-build-full (funcall (cadr (assoc 'get-exec-path-fn build)))
-                    (funcall (cadr (assoc 'get-path-fn build)))
-                    (funcall (cadr (assoc 'get-extra-env-fn build)))
-                    make-path output-path)))
+  (let ((toolchain (cadr (assoc selected-toolchain mwb-toolchains)))
+        (selected-configuration
+         (cadr (assoc (if configuration configuration
+                        mwb-configuration-default)
+                      mwb-configurations))))
+    (funcall (cadr (assoc 'ensure-fn toolchain)))
+    (mwb-build-full (funcall (cadr (assoc 'get-exec-path-fn toolchain)))
+                    (funcall (cadr (assoc 'get-path-fn toolchain)))
+                    (funcall (cadr (assoc 'get-extra-env-fn toolchain)))
+                    selected-configuration make-path output-path)))
 
 ;; * Generic builder
-(defun mwb-build-full (exec-path path extra-env configuration-dir destination-dir)
+(defun mwb-build-full (exec-path path extra-env configuration configuration-dir destination-dir)
   "Build Emacs in CONFIGURATION-DIR from sources in mwb-emacs-source and install
 it into DESTINATION-DIR.  EXEC-PATH, PATH and EXTRA-ENV would eventually get passed
 to mwb-command and used there."
   (mwb-autogen exec-path path extra-env)
-  (mwb-configure exec-path path extra-env configuration-dir destination-dir)
+  (mwb-configure exec-path path extra-env configuration configuration-dir destination-dir)
   (mwb-make exec-path path extra-env configuration-dir)
   (mwb-make-install exec-path path extra-env configuration-dir))
 
 (defun mwb-autogen (exec-path path extra-env)
   (mwb-command exec-path path extra-env "./autogen.sh" mwb-emacs-source))
 
-(defun mwb-configure (exec-path path extra-env configuration-dir prefix)
-  (mwb-command exec-path path (append extra-env mwb-configure-env)
+(defun mwb-configure (exec-path path extra-env configuration configuration-dir prefix)
+  (mwb-command exec-path path (append extra-env (cadr (assoc 'configure-env configuration)))
                (concat "eval " mwb-emacs-source "/configure" " \""
-                       mwb-configure-args " --prefix="
+                       (cadr (assoc 'configure-args configuration)) " --prefix="
                        (mwb-mingw-convert-path prefix) "\"")
                configuration-dir))
-
-(defcustom mwb-configure-env '("CFLAGS=-Og -gdwarf-4 -g3")
-  "Extra environment vairables to set during configuration.  Compiler optimization is set here.")
-
-(defvar mwb-configure-args
-  "--without-imagemagick --enable-checking='yes,glyphs' --enable-check-lisp-object-type")
 
 (defun mwb-make (exec-path path extra-env configuration-dir)
   (mwb-command exec-path path extra-env
                (concat "make -j " (number-to-string mwb-make-threads))
                configuration-dir))
-
-(defcustom mwb-make-threads 1
-  "The number of threads to pass as -j flag to make.")
 
 (defun mwb-make-install (exec-path path extra-env configuration-dir)
   (mwb-command exec-path path extra-env
@@ -147,11 +137,6 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
     (process-file-shell-command command nil "mwb")))
 
 ;; * MinGW
-(defcustom mwb-mingw-directory "c:/Emacs/MinGW"
-  "* Place to check for MinGW and install it if it's not present."
-  :group 'mwb
-  :type 'directory)
-
 (defun mwb-mingw-get-exec-path ()
     (list (concat mwb-mingw-directory "/msys/1.0/bin/")))
 
@@ -241,11 +226,6 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
     mwb-msys2-x64-directory))
 
 ;; ** x32
-(defcustom mwb-msys2-x32-directory "c:/Emacs/msys32"
-  "* Place to check for 32 bit msys2 and install it if it's not present."
-  :group 'mwb
-  :type 'directory)
-
 (defun mwb-msys2-x32-get-path ()
   (concat "/mingw32/bin:" (mwb-msys2-get-common-path)))
 
@@ -260,11 +240,6 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
                               (mwb-msys2-x32-get-extra-env) mwb-msys2-x32-packages))
 
 ;; ** x64
-(defcustom mwb-msys2-x64-directory "c:/Emacs/msys64"
-  "* Place to check for MinGW and install it if it's not present."
-  :group 'mwb
-  :type 'directory)
-
 (defun mwb-msys2-x64-get-path ()
   (concat "/mingw64/bin:" (mwb-msys2-get-common-path)))
 

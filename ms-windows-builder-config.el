@@ -23,8 +23,27 @@
 ;; This file contains transient
 
 ;;; Code:
+(defcustom mwb-emacs-source "c:/Emacs/source"
+  "*Directory that contains Emacs source code."
+  :group 'mwb
+  :type 'directory)
 
-(defvar mwb-builds
+(defcustom mwb-mingw-directory "c:/Emacs/MinGW"
+  "* Place to check for MinGW and install it if it's not present."
+  :group 'mwb
+  :type 'directory)
+
+(defcustom mwb-msys2-x32-directory "c:/Emacs/msys32"
+  "* Place to check for 32 bit msys2 and install it if it's not present."
+  :group 'mwb
+  :type 'directory)
+
+(defcustom mwb-msys2-x64-directory "c:/Emacs/msys64"
+  "* Place to check for MinGW and install it if it's not present."
+  :group 'mwb
+  :type 'directory)
+
+(defvar mwb-toolchains
   '((mingw ((ensure-fn mwb-mingw-ensure)
             (get-exec-path-fn mwb-mingw-get-exec-path)
             (get-path-fn mwb-mingw-get-path)
@@ -38,6 +57,29 @@
                 (get-path-fn mwb-msys2-x64-get-path)
                 (get-extra-env-fn mwb-msys2-x64-get-extra-env))))
   "List of possbile builds for building Emacs.")
+
+(defcustom mwb-configurations
+  '((debug
+     ((configure-env ("CFLAGS=-O0 -gdwarf-2 -g3"))
+      (configure-args "--without-imagemagick --enable-checking='yes,glyphs' --enable-check-lisp-object-type")))
+    (debug-with-modules
+     ((configure-env ("CFLAGS=-O0 -gdwarf-2 -g3"))
+      (configure-args "--without-imagemagick --enable-checking='yes,glyphs' --enable-check-lisp-object-type --with-modules")))
+    (release
+     ((configure-env ("CFLAGS=-O2 -gdwarf-4 -g3"))
+      (configure-args "--without-imagemagick")))
+    (release-with-modules
+     ((configure-env ("CFLAGS=-O2 -gdwarf-4 -g3"))
+      (configure-args "--without-imagemagick --with-modules"))))
+  "*List of possible configurations."
+  :group 'mwb)
+
+(defcustom mwb-configuration-default 'debug
+  "*Default configure setup to use."
+  :group 'mwb)
+
+(defcustom mwb-make-threads 1
+  "The number of threads to pass as -j flag to make.")
 
 (defvar mwb-mingw-packages
   '(("https://sourceforge.net/projects/mingw/files/MinGW/Base/"
