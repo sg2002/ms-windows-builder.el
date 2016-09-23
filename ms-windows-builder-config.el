@@ -43,6 +43,11 @@
   :group 'mwb
   :type 'directory)
 
+(defcustom mwb-wget-download-directory "c:/Emacs/downloads"
+  "*Directory to put files downloaded by wget."
+  :group 'mwb
+  :type 'directory)
+
 (defvar mwb-toolchains
   '((mingw ((ensure-fn mwb-mingw-ensure)
             (get-exec-path-fn mwb-mingw-get-exec-path)
@@ -67,14 +72,16 @@
       (configure-args "--without-imagemagick --enable-checking='yes,glyphs' --enable-check-lisp-object-type --with-modules")))
     (release
      ((configure-env ("CFLAGS=-O2 -gdwarf-4 -g3"))
-      (configure-args "--without-imagemagick")))
+      (configure-args "--without-imagemagick")
+      (install-strip t)))
     (release-with-modules
      ((configure-env ("CFLAGS=-O2 -gdwarf-4 -g3"))
-      (configure-args "--without-imagemagick --with-modules"))))
+      (configure-args "--without-imagemagick --with-modules")
+      (install-strip t))))
   "*List of possible configurations."
   :group 'mwb)
 
-(defcustom mwb-configuration-default 'debug
+(defcustom mwb-default-configuration 'debug
   "*Default configure setup to use."
   :group 'mwb)
 
@@ -84,9 +91,9 @@
 (defvar mwb-mingw-packages
   '(("https://sourceforge.net/projects/mingw/files/MinGW/Base/"
      ("binutils/binutils-2.25.1/binutils-2.25.1-1-mingw32-bin.tar.xz"
-      "mingwrt/mingwrt-3.22/mingwrt-3.22.1-mingw32-dev.tar.xz"
-      "mingwrt/mingwrt-3.22/mingwrt-3.22.1-mingw32-dll.tar.xz"
-      "w32api/w32api-3.18/w32api-3.18.1-mingw32-dev.tar.xz"
+      "mingwrt/mingwrt-3.22/mingwrt-3.22.2-mingw32-dev.tar.xz"
+      "mingwrt/mingwrt-3.22/mingwrt-3.22.2-mingw32-dll.tar.xz"
+      "w32api/w32api-3.18/w32api-3.18.2-mingw32-dev.tar.xz"
       "mpc/mpc-1.0.2/libmpc-1.0.2-mingw32-dll-3.tar.xz"
       "mpfr/mpfr-3.1.2-2/mpfr-3.1.2-2-mingw32-dll.tar.lzma"
       "gmp/gmp-5.1.2/gmp-5.1.2-1-mingw32-dll.tar.lzma"
@@ -108,6 +115,8 @@
 (defvar mwb-msys-packages
   '(("https://sourceforge.net/projects/mingw/files/MSYS/"
      ("Base/msys-core/msys-1.0.19-1/msysCORE-1.0.19-1-msys-1.0.19-bin.tar.xz"
+      ;; msys.ext is not necessary, but it contains msys.bat
+      "Base/msys-core/msys-1.0.19-1/msysCORE-1.0.19-1-msys-1.0.19-ext.tar.xz"
       "Base/bash/bash-3.1.23-1/bash-3.1.23-1-msys-1.0.18-bin.tar.xz"
       "Base/gettext/gettext-0.18.1.1-1/libintl-0.18.1.1-1-msys-1.0.17-dll-8.tar.lzma"
       "Base/libiconv/libiconv-1.14-1/libiconv-1.14-1-msys-1.0.17-dll-2.tar.lzma"

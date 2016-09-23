@@ -32,6 +32,13 @@ For Msys2-x64:
 #+BEGIN_SRC emacs-lisp
 (mwb-build 'msys2-x64  "c:/Emacs/configs/msys2-x64" "c:/Emacs/25-dev-msys2-x64")
 #+end_src
+
+You can also specify a specific build configuration:
+#+BEGIN_SRC emacs-lisp
+(mwb-build 'msys2-x64  "c:/Emacs/configs/msys2-x64" "c:/Emacs/25-dev-msys2-x64" 'release)
+#+end_src
+Configurations are defined in mwb-configurations. If no configuration is specified, mwb-default-configuration is used.
+
 Full build starting from the toolchain setup would take at least 20 minutes for MinGW and 30 minutes for Msys2.
 *** Msys2 specific
 During msys2 setup you would get a shell window.  You can close it after it's done with setup and you see the command prompt.
@@ -45,3 +52,5 @@ If you have MinGW already installed and try to use the same location, but it doe
 For Msys it should install all packages, you can also do it manually using (mwb-msys2-install-packages).
 ** Troubleshooting
 All output gets saved to "mwb" buffer.
+
+If the script is unable to download one of the dependenices, open its path in browser and see if there's a newer version. Then replace it in the config file.

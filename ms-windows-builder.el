@@ -47,6 +47,10 @@
 ;; (mwb-build 'msys2-x32  "c:/Emacs/configs/msys2-x32" "c:/Emacs/25-dev-msys2-x32")
 ;; For Msys2-x64:
 ;; (mwb-build 'msys2-x64  "c:/Emacs/configs/msys2-x64" "c:/Emacs/25-dev-msys2-x64")
+;;You can also specify a specific build configuration:
+;; (mwb-build 'msys2-x64  "c:/Emacs/configs/msys2-x64" "c:/Emacs/25-dev-msys2-x64" 'release)
+;; Configurations are defined in mwb-configurations.  If no configuration is
+;; specified, mwb-default-configuration is used.
 ;; Full build starting from the toolchain setup would take
 ;; at least 20 minutes for MinGW and 30 minutes for Msys2.
 
@@ -67,6 +71,7 @@
 
 ;; Troubleshooting:
 ;; All output gets saved to "mwb" buffer.
+;; If the script is unable to download one of the dependenices, open its path in browser and see if there's a newer version. Then replace it in the config file.
 
 ;;; Code:
 (require 'ms-windows-builder-config)
@@ -78,7 +83,7 @@ configure and make in MAKE-PATH. Install Emacs into OUTPUT-PATH."
   (let ((toolchain (cadr (assoc selected-toolchain mwb-toolchains)))
         (selected-configuration
          (cadr (assoc (if configuration configuration
-                        mwb-configuration-default)
+                        mwb-default-configuration)
                       mwb-configurations))))
     (funcall (cadr (assoc 'ensure-fn toolchain)))
     (mwb-build-full (funcall (cadr (assoc 'get-exec-path-fn toolchain)))
@@ -94,7 +99,7 @@ to mwb-command and used there."
   (mwb-autogen exec-path path extra-env)
   (mwb-configure exec-path path extra-env configuration configuration-dir destination-dir)
   (mwb-make exec-path path extra-env configuration-dir)
-  (mwb-make-install exec-path path extra-env configuration-dir))
+  (mwb-make-install exec-path path extra-env configuration configuration-dir))
 
 (defun mwb-autogen (exec-path path extra-env)
   (mwb-command exec-path path extra-env "./autogen.sh" mwb-emacs-source))
@@ -111,9 +116,11 @@ to mwb-command and used there."
                (concat "make -j " (number-to-string mwb-make-threads))
                configuration-dir))
 
-(defun mwb-make-install (exec-path path extra-env configuration-dir)
+(defun mwb-make-install (exec-path path extra-env configuration configuration-dir)
   (mwb-command exec-path path extra-env
-               "make install"
+               (concat "make install"
+                       (when (cadr (assoc 'install-strip configuration))
+                         "-strip"))
                configuration-dir))
 
 (defun mwb-command (exec-path path extra-env command &optional dir)
@@ -330,11 +337,6 @@ Needed for GnuWin version, because it fails for https."
 (defcustom mwb-wget-paths '("c:/Program Files (x86)/GnuWin32/bin/" "c:/Program Files/GnuWin32/bin/")
   "*Paths to search for wget."
   :group 'mwb)
-
-(defcustom mwb-wget-download-directory "c:/Emacs/downloads"
-  "*Directory to put files downloaded by wget."
-  :group 'mwb
-  :type 'directory)
 
 (provide 'ms-windows-builder)
 ;;; ms-windows-builder.el ends here
