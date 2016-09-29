@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;; This file contains transient
+;; This file contains variables used for configuring ms-windows-builder.
 
 ;;; Code:
 (defcustom mwb-emacs-source "c:/Emacs/source"
@@ -66,23 +66,39 @@
 (defcustom mwb-configurations
   '((debug
      ((configure-env ("CFLAGS=-O0 -gdwarf-2 -g3"))
-      (configure-args "--without-imagemagick --enable-checking='yes,glyphs' --enable-check-lisp-object-type")))
+      (configure-args ("--without-imagemagick"
+                       "--with-wide-int"
+                       "--enable-checking='yes,glyphs'"
+                       "--enable-check-lisp-object-type"))))
     (debug-with-modules
      ((configure-env ("CFLAGS=-O0 -gdwarf-2 -g3"))
-      (configure-args "--without-imagemagick --enable-checking='yes,glyphs' --enable-check-lisp-object-type --with-modules")))
+      (configure-args ("--without-imagemagick"
+                       "--with-wide-int"
+                       "--enable-checking='yes,glyphs'"
+                       "--enable-check-lisp-object-type"
+                       "--with-modules"))))
     (release
      ((configure-env ("CFLAGS=-O2 -gdwarf-4 -g3"))
-      (configure-args "--without-imagemagick")
+      (configure-args ("--without-imagemagick"
+                       "--with-wide-int"))
       (install-strip t)))
     (release-with-modules
      ((configure-env ("CFLAGS=-O2 -gdwarf-4 -g3"))
-      (configure-args "--without-imagemagick --with-modules")
+      (configure-args ("--without-imagemagick"
+                       "--with-wide-int"
+                       "--with-modules"))
       (install-strip t))))
   "*List of possible configurations."
   :group 'mwb)
 
 (defcustom mwb-default-configuration 'debug
   "*Default configure setup to use."
+  :group 'mwb)
+
+(defcustom mwb-configuration-args
+  '(("--with-wide-int" ((toolchains (mingw msys2-x32)))))
+  "*Possible options for a specific configuration argument.
+Currently it only allows to limit use of specific arguments by toolchains."
   :group 'mwb)
 
 (defcustom mwb-make-threads 1

@@ -20,59 +20,6 @@
 
 ;;; Commentary:
 
-;; This script installs the required tools and then builds Emacs from the
-;; source code.
-
-;; Requirements:
-;; The only requirement is wget.  You can get it from GnuWin project:
-;; http://gnuwin32.sourceforge.net/packages/wget.htm
-;; Or from ezwinports:
-;; https://sourceforge.net/projects/ezwinports/files/wget-1.16.1-w32-bin.zip
-;; Then either put it on PATH or put the path to it into mwb-wget-paths.
-;; Path for GnuWin version is already set up.
-;; Anything downloaded by this script using wget gets stored to
-;; mwb-wget-download-directory and reused if it's already there.
-
-;; 7Zip would get installed, unless it's already present on your PATH.
-
-;; Usage:
-;; Make sure that depending on the build  mwb-mingw-directory,
-;; mwb-msys2-x64-directory or mwb-msys2-x32-directory is writable
-;; and mwb-emacs-source points to Emacs source repository.
-;; Put the script on your load path and do:
-;; (require 'ms-windows-builder)
-;; Then use the build function.  For MinGW:
-;; (mwb-build 'mingw "c:/Emacs/configs/mingw" "c:/Emacs/25-dev-mingw")
-;; For Msys2-x32:
-;; (mwb-build 'msys2-x32  "c:/Emacs/configs/msys2-x32" "c:/Emacs/25-dev-msys2-x32")
-;; For Msys2-x64:
-;; (mwb-build 'msys2-x64  "c:/Emacs/configs/msys2-x64" "c:/Emacs/25-dev-msys2-x64")
-;;You can also specify a specific build configuration:
-;; (mwb-build 'msys2-x64  "c:/Emacs/configs/msys2-x64" "c:/Emacs/25-dev-msys2-x64" 'release)
-;; Configurations are defined in mwb-configurations.  If no configuration is
-;; specified, mwb-default-configuration is used.
-;; Full build starting from the toolchain setup would take
-;; at least 20 minutes for MinGW and 30 minutes for Msys2.
-
-;; Msys2 specific:
-;; During msys2 setup you would get a shell window.  You can close
-;; it after it's done with setup and you see the command prompt.
-
-;; Known issues:
-;; This script is completely synchronous and would freeze your Emacs session.
-;; Running it in a separate session is recommended.
-;; If you have MinGW already installed and try to use the same location, but it does not
-;; have all of the required components, this script would break.  You can manually
-;; install components into existing toolchain using (mwb-mingw-install-packages).
-;; This script assumes that your Msys is installed within the MinGW tree.  Otherwise,
-;; installing a different MinGW using this script is highly recommended.
-;; For Msys it should install all packages, you can also do it manually using
-;; (mwb-msys2-install-packages).
-
-;; Troubleshooting:
-;; All output gets saved to "mwb" buffer.
-;; If the script is unable to download one of the dependenices, open its path in browser and see if there's a newer version. Then replace it in the config file.
-
 ;;; Code:
 (require 'ms-windows-builder-config)
 
@@ -82,16 +29,43 @@
 configure and make in MAKE-PATH. Install Emacs into OUTPUT-PATH."
   (let ((toolchain (cadr (assoc selected-toolchain mwb-toolchains)))
         (selected-configuration
-         (cadr (assoc (if configuration configuration
-                        mwb-default-configuration)
-                      mwb-configurations))))
+         (mwb-apply-arg-configurations selected-toolchain
+                                       (cadr (assoc (if configuration configuration
+                                                      mwb-default-configuration)
+                       mwb-configurations)))))
     (funcall (cadr (assoc 'ensure-fn toolchain)))
     (mwb-build-full (funcall (cadr (assoc 'get-exec-path-fn toolchain)))
                     (funcall (cadr (assoc 'get-path-fn toolchain)))
                     (funcall (cadr (assoc 'get-extra-env-fn toolchain)))
                     selected-configuration make-path output-path)))
 
+(defun mwb-apply-arg-configurations (selected-toolchain configuration)
+  "Apply configurations for each configure argument in the configuration."
+  (add-to-list
+   'configuration
+   `(configure-args .
+                    ,(list (mwb-filter-args selected-toolchain
+                                            (cadr (assoc 'configure-args configuration)))))))
+
+(defun mwb-filter-args (selected-toolchain configure-args)
+  "Filter arguments from CONFIGURE-ARGS, when SELECTED-TOOLCHAIN is in
+mwb-confugration-args for them."
+  (delq
+   nil
+   (mapcar
+    (lambda (s)
+      (if
+          (or
+           (not (assoc 'toolchains
+                       (cadr (assoc s mwb-configuration-args))))
+           (memq selected-toolchain
+                 (cadr (assoc 'toolchains
+                              (cadr (assoc s mwb-configuration-args))))))
+          s nil))
+    configure-args)))
+
 ;; * Generic builder
+
 (defun mwb-build-full (exec-path path extra-env configuration configuration-dir destination-dir)
   "Build Emacs in CONFIGURATION-DIR from sources in mwb-emacs-source and install
 it into DESTINATION-DIR.  EXEC-PATH, PATH and EXTRA-ENV would eventually get passed
@@ -107,7 +81,8 @@ to mwb-command and used there."
 (defun mwb-configure (exec-path path extra-env configuration configuration-dir prefix)
   (mwb-command exec-path path (append extra-env (cadr (assoc 'configure-env configuration)))
                (concat "eval " mwb-emacs-source "/configure" " \""
-                       (cadr (assoc 'configure-args configuration)) " --prefix="
+                       (mapconcat 'identity (cadr (assoc 'configure-args configuration)) " ")
+                       " --prefix="
                        (mwb-mingw-convert-path prefix) "\"")
                configuration-dir))
 
