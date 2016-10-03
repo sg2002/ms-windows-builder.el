@@ -37,7 +37,8 @@ configure and make in MAKE-PATH. Install Emacs into OUTPUT-PATH."
     (mwb-build-full (funcall (cadr (assoc 'get-exec-path-fn toolchain)))
                     (funcall (cadr (assoc 'get-path-fn toolchain)))
                     (funcall (cadr (assoc 'get-extra-env-fn toolchain)))
-                    selected-configuration make-path output-path)))
+                    selected-configuration make-path output-path
+                    (funcall (cadr (assoc 'get-libraries-dir-fn toolchain))))))
 
 (defun mwb-apply-arg-configurations (selected-toolchain configuration)
   "Apply configurations for each configure argument in the configuration."
@@ -66,14 +67,16 @@ mwb-confugration-args for them."
 
 ;; * Generic builder
 
-(defun mwb-build-full (exec-path path extra-env configuration configuration-dir destination-dir)
+(defun mwb-build-full (exec-path path extra-env configuration
+                                 configuration-dir destination-dir libraries-dir)
   "Build Emacs in CONFIGURATION-DIR from sources in mwb-emacs-source and install
 it into DESTINATION-DIR.  EXEC-PATH, PATH and EXTRA-ENV would eventually get passed
 to mwb-command and used there."
   (mwb-autogen exec-path path extra-env)
   (mwb-configure exec-path path extra-env configuration configuration-dir destination-dir)
   (mwb-make exec-path path extra-env configuration-dir)
-  (mwb-make-install exec-path path extra-env configuration configuration-dir))
+  (mwb-make-install exec-path path extra-env configuration configuration-dir)
+  (mwb-copy-libraries libraries-dir destination-dir))
 
 (defun mwb-autogen (exec-path path extra-env)
   (mwb-command exec-path path extra-env "./autogen.sh" mwb-emacs-source))
@@ -97,6 +100,13 @@ to mwb-command and used there."
                        (when (cadr (assoc 'install-strip configuration))
                          "-strip"))
                configuration-dir))
+
+(defun mwb-copy-libraries (libraries-dir destination-dir)
+  "Copies each library from MWB-DYNAMIC-LIBRARIES that exists in LIBRARIES-DIR
+into DESTINATION-DIR."
+  (dolist (library mwb-dynamic-libraries)
+    (dolist (library-file (directory-files libraries-dir t library))
+      (copy-file library-file (concat  destination-dir "/bin/") t))))
 
 (defun mwb-command (exec-path path extra-env command &optional dir)
   "Execute shell command COMMAND. Global exec-path is replaced with EXEC-PATH.
@@ -134,6 +144,9 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
 
 (defun mwb-mingw-get-extra-env ()
   '())
+
+(defun mwb-mingw-get-libraries-dir ()
+  (concat mwb-mingw-directory "/bin/"))
 
 (defun mwb-mingw-ensure ()
   "Ensure we have MinGW installed."
@@ -200,6 +213,12 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
 
 (defun mwb-msys2-get-exec-path ()
   (list (concat (mwb-msys2-get-current-directory)  "/usr/bin/")))
+
+(defun mwb-msys2-get-libraries-dir ()
+  (concat (mwb-msys2-get-current-directory)
+          (if (or mwb-msys2-x32-force
+                  (not (mwb-windows-is-64-bit))) "/mingw32/bin/"
+            "/mingw64/bin/")))
 
 (defun mwb-msys2-get-current-directory ()
   "Return directory for currently installed msys"

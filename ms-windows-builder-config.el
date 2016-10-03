@@ -52,15 +52,18 @@
   '((mingw ((ensure-fn mwb-mingw-ensure)
             (get-exec-path-fn mwb-mingw-get-exec-path)
             (get-path-fn mwb-mingw-get-path)
-            (get-extra-env-fn mwb-mingw-get-extra-env)))
+            (get-extra-env-fn mwb-mingw-get-extra-env)
+            (get-libraries-dir-fn mwb-mingw-get-libraries-dir)))
     (msys2-x32 ((ensure-fn mwb-msys2-x32-ensure)
                 (get-exec-path-fn mwb-msys2-get-exec-path)
                 (get-path-fn mwb-msys2-x32-get-path)
-                (get-extra-env-fn mwb-msys2-x32-get-extra-env)))
+                (get-extra-env-fn mwb-msys2-x32-get-extra-env)
+                (get-libraries-dir-fn mwb-msys2-get-libraries-dir)))
     (msys2-x64 ((ensure-fn mwb-msys2-x64-ensure)
                 (get-exec-path-fn mwb-msys2-get-exec-path)
                 (get-path-fn mwb-msys2-x64-get-path)
-                (get-extra-env-fn mwb-msys2-x64-get-extra-env))))
+                (get-extra-env-fn mwb-msys2-x64-get-extra-env)
+                (get-libraries-dir-fn mwb-msys2-get-libraries-dir))))
   "List of possbile builds for building Emacs.")
 
 (defcustom mwb-configurations
@@ -120,12 +123,18 @@ Currently it only allows to limit use of specific arguments by toolchains."
       "gcc/Version5/gcc-5.3.0-2/gcc-core-5.3.0-2-mingw32-bin.tar.xz"))
     ("https://sourceforge.net/projects/ezwinports/files/"
      ("pkg-config-0.28-w32-bin.zip"
-      ;; gnutls dependencies start
+      "zlib-1.2.8-2-w32-bin.zip"
+      ;; Gnutls
       "p11-kit-0.9-w32-bin.zip"
       "libtasn1-4.2-w32-bin.zip"
       "nettle-2.7.1-w32-bin.zip"
-      "zlib-1.2.8-2-w32-bin.zip"
-      "gnutls-3.3.11-w32-bin.zip"))))
+      "gnutls-3.3.11-w32-bin.zip"
+      ;; Images
+      "giflib-5.1.0-w32-bin.zip"
+      "jpeg-v9a-w32-bin.zip"
+      "libpng-1.6.12-w32-bin.zip"
+      "tiff-4.0.3-w32-bin.zip"
+      "libXpm-3.5.11-2-w32-bin.zip"))))
 
 
 (defvar mwb-msys-packages
@@ -179,7 +188,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
                                  "mingw-w64-i686-libxml2" "mingw-w64-i686-gnutls"))
 
 (defvar mwb-msys2-x32-dist
-  "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20160719.tar.xz")
+  "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20160921.tar.xz")
 
 
 (defvar mwb-msys2-x64-packages '("base-devel" "mingw-w64-x86_64-toolchain"
@@ -189,8 +198,39 @@ Currently it only allows to limit use of specific arguments by toolchains."
                                  "mingw-w64-x86_64-libxml2" "mingw-w64-x86_64-gnutls"))
 
 (defvar mwb-msys2-x64-dist
-  "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20160719.tar.xz")
+  "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20160921.tar.xz")
 
+(defcustom mwb-dynamic-libraries
+  '(;; libwinpthread is needed for msys2 only, it can be linked statically
+    ;; by passing CFLAGS= -static to the configure script.
+    "libwinpthread-.*\\.dll"
+    "libgcc_s_seh-.*\\.dll"
+    ;; "libdbus-.*\\.dll"
+    "zlib.*\\.dll" ; used by emacs for compression, also by libcroco
+    "liblzma-.*\\.dll" ;; required by libxml2 and libtiff
+    ;; XML support library, required for HTML and XML support in Emacs
+    ;; also required by rsvg
+    "libxml2-.*\\.dll"
+    ;; Gnutls
+    "libffi-.*\\.dll" ; only needed for msys2-based builds
+    "libgmp-.*\\.dll" "libgnutls-[0-9].\\.dll" "libhogweed-.*\\.dll" "libiconv-.*\\.dll"
+    "libidn-.*\\.dll" ; only needed for msys2-based builds
+    "libintl-.*\\.dll" "libnettle-.*\\.dll" "libp11-kit-.*\\.dll" "libtasn1-.*\\.dll"
+    ;; Images
+    "libgif-.*\\.dll" ; gif images
+    "libjpeg-.*\\.dll" ; jpeg images
+    "libpng.*\\.dll" ; png images, also required by libcroco and libgdk_pixbuf
+    "libtiff-.*\\.dll" ; tiff images
+    "libXpm-noX.*\\.dll" ; xpm images
+    ;; "libjbig-.*\\.dll" ; not needed because libjpeg already opens jbig images
+    ;; svg images
+    "libpcre-.*\\.dll" "libglib-.*\\.dll" "libgmodule-.*\\.dll" "libgobject-.*\\.dll"
+    "libgio-.*\\.dll" "libexpat-.*\\.dll" "libfontconfig-.*\\.dll""libbz2-.*\\.dll"
+    "libstdc\\+\\+-.*\\.dll" "libgraphite.*\\.dll" "libharfbuzz-.\\.dll" "libfreetype-.*\\.dll"
+    "libpixman-.*\\.dll" "libcairo-.\\.dll" "libcroco-.*\\.dll" "libgdk_pixbuf-.*\\.dll"
+    "libpango-.*\\.dll" "libpangoft.*\\.dll" "libpangowin32-.*\\.dll" "libpangocairo-.*\\.dll"
+    "librsvg-.*\\.dll")
+  "Dynamic libraries to copy into the installation dir.")
 
 (provide 'ms-windows-builder-config)
 ;;; ms-windows-builder-config.el ends here
