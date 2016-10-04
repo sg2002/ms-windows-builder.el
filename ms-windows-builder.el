@@ -157,7 +157,13 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
 (defun mwb-mingw-install ()
   (mwb-mingw-install-packages)
   (rename-file (concat mwb-mingw-directory "/msys/1.0/etc/" "fstab.sample")
-               (concat mwb-mingw-directory "/msys/1.0/etc/" "fstab")))
+               (concat mwb-mingw-directory "/msys/1.0/etc/" "fstab"))
+  ;; We have to do this in case of non-standard mwb-mingw-directory
+  (with-current-buffer (find-file-noselect
+                        (concat mwb-mingw-directory "/msys/1.0/etc/" "fstab") t)
+    (replace-string "c:/MinGW" mwb-mingw-directory)
+    (save-buffer)
+    (kill-buffer)))
 
 (defun mwb-mingw-install-packages ()
   "Install all packages from mwb-mingw-packages and mwb-msys-packages into mwb-mingw-directory."
@@ -167,7 +173,7 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
     (mwb-mingw-install-packages-from-source source-packages (concat mwb-mingw-directory "/msys/1.0/"))))
 
 (defun mwb-mingw-install-packages-from-source (source-packages directory)
-  "Install packages from a list SOURCE-PACKAGES into direcotry DIRECTORY.
+  "Install packages from a list SOURCE-PACKAGES into DIRECTORY.
 SOURCE-PACKAGES should have the common download path as car and the list of packages as cdr."
   (dolist (package (cadr source-packages))
     (mwb-mingw-install-package (concat (car source-packages) package)

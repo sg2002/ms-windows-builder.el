@@ -110,9 +110,14 @@ Currently it only allows to limit use of specific arguments by toolchains."
 (defvar mwb-mingw-packages
   '(("https://sourceforge.net/projects/mingw/files/MinGW/Base/"
      ("binutils/binutils-2.25.1/binutils-2.25.1-1-mingw32-bin.tar.xz"
-      "mingwrt/mingwrt-3.22/mingwrt-3.22.2-mingw32-dev.tar.xz"
-      "mingwrt/mingwrt-3.22/mingwrt-3.22.2-mingw32-dll.tar.xz"
-      "w32api/w32api-3.18/w32api-3.18.2-mingw32-dev.tar.xz"
+      ;; Building with libxml would fail
+      ;;"mingwrt/mingwrt-3.22/mingwrt-3.22.2-mingw32-dev.tar.xz"
+      ;;"mingwrt/mingwrt-3.22/mingwrt-3.22.2-mingw32-dll.tar.xz"
+      "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dev.tar.xz"
+      "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dll.tar.xz"
+      ;; Building with glib would fail
+      ;;"w32api/w32api-3.18/w32api-3.18.2-mingw32-dev.tar.xz"
+      "w32api/w32api-3.17/w32api-3.17-2-mingw32-dev.tar.lzma"
       "mpc/mpc-1.0.2/libmpc-1.0.2-mingw32-dll-3.tar.xz"
       "mpfr/mpfr-3.1.2-2/mpfr-3.1.2-2-mingw32-dll.tar.lzma"
       "gmp/gmp-5.1.2/gmp-5.1.2-1-mingw32-dll.tar.lzma"
@@ -120,21 +125,34 @@ Currently it only allows to limit use of specific arguments by toolchains."
       "pthreads-w32/pthreads-w32-2.9.1/pthreads-w32-2.9.1-1-mingw32-dll.tar.lzma"
       "pthreads-w32/pthreads-w32-2.9.1/pthreads-w32-2.9.1-1-mingw32-dev.tar.lzma"
       "gettext/gettext-0.18.3.2-2/gettext-0.18.3.2-2-mingw32-dev.tar.xz"
-      "gcc/Version5/gcc-5.3.0-2/gcc-core-5.3.0-2-mingw32-bin.tar.xz"))
+      "gcc/Version5/gcc-5.3.0-2/gcc-core-5.3.0-2-mingw32-bin.tar.xz"
+      ;; Newer libiconv is available, but we still use this one, because that's
+      ;; what ezwinports libxml is linked against.
+      "libiconv/libiconv-1.13.1-1/libiconv-1.13.1-1-mingw32-dev.tar.lzma"))
     ("https://sourceforge.net/projects/ezwinports/files/"
      ("pkg-config-0.28-w32-bin.zip"
       "zlib-1.2.8-2-w32-bin.zip"
       ;; Gnutls
       "p11-kit-0.9-w32-bin.zip"
-      "libtasn1-4.2-w32-bin.zip"
-      "nettle-2.7.1-w32-bin.zip"
-      "gnutls-3.3.11-w32-bin.zip"
+      "libidn-1.29-w32-bin.zip"
+      "libtasn1-4.9-w32-bin.zip"
+      "nettle-3.3-w32-bin.zip"
+      "gnutls-3.4.15-w32-bin.zip"
       ;; Images
       "giflib-5.1.0-w32-bin.zip"
       "jpeg-v9a-w32-bin.zip"
       "libpng-1.6.12-w32-bin.zip"
       "tiff-4.0.3-w32-bin.zip"
-      "libXpm-3.5.11-2-w32-bin.zip"))))
+      "libXpm-3.5.11-2-w32-bin.zip"
+      "pcre-8.21-w32-bin.zip"
+      "glib-2.38.2-w32-bin.zip"
+      "bzip2-1.0.6-w32-bin.zip"
+      "pixman-0.32.4-w32-bin.zip"
+      "cairo-1.12.16-w32-bin.zip"
+      "libcroco-0.6.8-w32-bin.zip"
+      "gdk-pixbuf-2.30.2-w32-bin.zip"
+      "pango-1.36.1-2-w32-bin.zip"
+      "librsvg-2.40.1-2-w32-bin.zip"))))
 
 
 (defvar mwb-msys-packages
@@ -182,20 +200,20 @@ Currently it only allows to limit use of specific arguments by toolchains."
 
 
 (defvar mwb-msys2-x32-packages '("base-devel" "mingw-w64-i686-toolchain"
+                                 "mingw-w64-i686-libxml2" "mingw-w64-i686-gnutls"
                                  "mingw-w64-i686-xpm-nox" "mingw-w64-i686-libtiff"
                                  "mingw-w64-i686-giflib" "mingw-w64-i686-libpng"
-                                 "mingw-w64-i686-libjpeg-turbo" "mingw-w64-i686-librsvg"
-                                 "mingw-w64-i686-libxml2" "mingw-w64-i686-gnutls"))
+                                 "mingw-w64-i686-libjpeg-turbo" "mingw-w64-i686-librsvg"))
 
 (defvar mwb-msys2-x32-dist
   "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20160921.tar.xz")
 
 
 (defvar mwb-msys2-x64-packages '("base-devel" "mingw-w64-x86_64-toolchain"
+                                 "mingw-w64-x86_64-libxml2" "mingw-w64-x86_64-gnutls"
                                  "mingw-w64-x86_64-xpm-nox" "mingw-w64-x86_64-libtiff"
                                  "mingw-w64-x86_64-giflib" "mingw-w64-x86_64-libpng"
-                                 "mingw-w64-x86_64-libjpeg-turbo" "mingw-w64-x86_64-librsvg"
-                                 "mingw-w64-x86_64-libxml2" "mingw-w64-x86_64-gnutls"))
+                                 "mingw-w64-x86_64-libjpeg-turbo" "mingw-w64-x86_64-librsvg"))
 
 (defvar mwb-msys2-x64-dist
   "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20160921.tar.xz")
@@ -213,16 +231,15 @@ Currently it only allows to limit use of specific arguments by toolchains."
     "libxml2-.*\\.dll"
     ;; Gnutls
     "libffi-.*\\.dll" ; only needed for msys2-based builds
-    "libgmp-.*\\.dll" "libgnutls-[0-9].\\.dll" "libhogweed-.*\\.dll" "libiconv-.*\\.dll"
-    "libidn-.*\\.dll" ; only needed for msys2-based builds
-    "libintl-.*\\.dll" "libnettle-.*\\.dll" "libp11-kit-.*\\.dll" "libtasn1-.*\\.dll"
+    "libgmp-.*\\.dll" "libgnutls-[0-9].\\.dll" "libhogweed-.*\\.dll"
+    "libiconv-.*\\.dll" "libidn-.*\\.dll" "libintl-.*\\.dll"
+    "libnettle-.*\\.dll" "libp11-kit-.*\\.dll" "libtasn1-.*\\.dll"
     ;; Images
     "libgif-.*\\.dll" ; gif images
     "libjpeg-.*\\.dll" ; jpeg images
     "libpng.*\\.dll" ; png images, also required by libcroco and libgdk_pixbuf
     "libtiff-.*\\.dll" ; tiff images
     "libXpm-noX.*\\.dll" ; xpm images
-    ;; "libjbig-.*\\.dll" ; not needed because libjpeg already opens jbig images
     ;; svg images
     "libpcre-.*\\.dll" "libglib-.*\\.dll" "libgmodule-.*\\.dll" "libgobject-.*\\.dll"
     "libgio-.*\\.dll" "libexpat-.*\\.dll" "libfontconfig-.*\\.dll""libbz2-.*\\.dll"
