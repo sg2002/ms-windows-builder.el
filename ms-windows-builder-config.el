@@ -110,13 +110,15 @@ Currently it only allows to limit use of specific arguments by toolchains."
 (defvar mwb-mingw-packages
   '(("https://sourceforge.net/projects/mingw/files/MinGW/Base/"
      ("binutils/binutils-2.25.1/binutils-2.25.1-1-mingw32-bin.tar.xz"
-      ;; Building with libxml would fail
-      ;;"mingwrt/mingwrt-3.22/mingwrt-3.22.2-mingw32-dev.tar.xz"
-      ;;"mingwrt/mingwrt-3.22/mingwrt-3.22.2-mingw32-dll.tar.xz"
-      "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dev.tar.xz"
-      "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dll.tar.xz"
-      ;; Building with glib would fail
+      ;;"mingwrt/mingwrt-3.22/mingwrt-3.22.4-mingw32-dll.tar.xz"
+      ;;"mingwrt/mingwrt-3.22/mingwrt-3.22.4-mingw32-dev.tar.xz"
       ;;"w32api/w32api-3.18/w32api-3.18.2-mingw32-dev.tar.xz"
+      ;; Building with libxml and glib(both required for svg image support)
+      ;; would fail with newer mingwrt and w32api.
+      ;; This was fixed in 34b6df1, but if you're building up to and including 25.1
+      ;; use these older versions:
+      "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dll.tar.xz"
+      "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dev.tar.xz"
       "w32api/w32api-3.17/w32api-3.17-2-mingw32-dev.tar.lzma"
       "mpc/mpc-1.0.2/libmpc-1.0.2-mingw32-dll-3.tar.xz"
       "mpfr/mpfr-3.1.2-2/mpfr-3.1.2-2-mingw32-dll.tar.lzma"
@@ -206,7 +208,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
                                  "mingw-w64-i686-libjpeg-turbo" "mingw-w64-i686-librsvg"))
 
 (defvar mwb-msys2-x32-dist
-  "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20160921.tar.xz")
+  "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20161025.tar.xz")
 
 
 (defvar mwb-msys2-x64-packages '("base-devel" "mingw-w64-x86_64-toolchain"
@@ -216,7 +218,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
                                  "mingw-w64-x86_64-libjpeg-turbo" "mingw-w64-x86_64-librsvg"))
 
 (defvar mwb-msys2-x64-dist
-  "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20160921.tar.xz")
+  "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20161025.tar.xz")
 
 (defcustom mwb-dynamic-libraries
   '(;; libwinpthread is needed for msys2 only, it can be linked statically

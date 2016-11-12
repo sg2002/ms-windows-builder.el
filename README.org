@@ -39,14 +39,10 @@ You can also specify a specific build configuration:
 #+end_src
 Configurations are defined in mwb-configurations. If no configuration is specified, mwb-default-configuration is used.
 
-Full build starting from the toolchain setup would take at least 20 minutes for MinGW and 30 minutes for Msys2.
+Full build starting from the toolchain setup would take at least 30 minutes.
 *** Msys2 specific
 During msys2 setup you would get a shell window.  You can close it after it's done with setup and you see the command prompt.
 ** Known issues
-This script is completely synchronous and would freeze your Emacs session.
-
-Running it in a separate session is recommended.
-
 If you have MinGW already installed and try to use the same location, but it does not have all of the required components, this script would break.  You can manually install components into existing toolchain using (mwb-mingw-install-packages).  This script assumes that your Msys is installed within the MinGW tree. Otherwise, installing a different MinGW using this script is highly recommended.
 
 For Msys it should install all packages, you can also do it manually using (mwb-msys2-install-packages).

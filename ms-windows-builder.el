@@ -27,18 +27,21 @@
 (defun mwb-build (selected-toolchain make-path output-path &optional configuration)
   "Build Emacs using SELECTED-BUILD, which should be defined in mwb-builds. Run
 configure and make in MAKE-PATH. Install Emacs into OUTPUT-PATH."
-  (let ((toolchain (cadr (assoc selected-toolchain mwb-toolchains)))
+  (let ((fininshed-fn (mwb-start))
+        (toolchain (cadr (assoc selected-toolchain mwb-toolchains)))
         (selected-configuration
          (mwb-apply-arg-configurations selected-toolchain
                                        (cadr (assoc (if configuration configuration
                                                       mwb-default-configuration)
-                       mwb-configurations)))))
-    (funcall (cadr (assoc 'ensure-fn toolchain)))
-    (mwb-build-full (funcall (cadr (assoc 'get-exec-path-fn toolchain)))
-                    (funcall (cadr (assoc 'get-path-fn toolchain)))
-                    (funcall (cadr (assoc 'get-extra-env-fn toolchain)))
-                    selected-configuration make-path output-path
-                    (funcall (cadr (assoc 'get-libraries-dir-fn toolchain))))))
+                                                    mwb-configurations)))))
+    (funcall (cadr (assoc 'ensure-fn toolchain))
+             (lambda ()
+               (mwb-build-full (funcall (cadr (assoc 'get-exec-path-fn toolchain)))
+                               (funcall (cadr (assoc 'get-path-fn toolchain)))
+                               (funcall (cadr (assoc 'get-extra-env-fn toolchain)))
+                               selected-configuration make-path output-path
+                               (funcall (cadr (assoc 'get-libraries-dir-fn toolchain)))
+                               fininshed-fn)))))
 
 (defun mwb-apply-arg-configurations (selected-toolchain configuration)
   "Apply configurations for each configure argument in the configuration."
@@ -65,50 +68,103 @@ mwb-confugration-args for them."
           s nil))
     configure-args)))
 
+(defvar mwb-started nil)
+
+(defun mwb-start(&optional continue)
+  (if (and (null continue) mwb-started)
+      (error "mwb: Build operation is already running. You can stop it using mwb-stop.")
+    (progn (setq mwb-started t)
+           (mwb-get-fininshed-fn))))
+
+(defun mwb-stop ()
+  (interactive)
+  (setq mwb-started nil)
+  (when (get-process "mwb")
+    (delete-process "mwb")))
+
+(defun mwb-get-fininshed-fn ()
+  (let ((start-time (current-time)))
+    (lambda () (setq mwb-started nil)
+      (let ((msg (format-message "mwb: Operation finished after: %s"
+                          (format-time-string "%T"
+                                              (time-subtract (current-time) start-time) t)))
+            (inhibit-read-only t))
+            (with-current-buffer (mwb-get-buffer)
+               (insert msg))
+            (message msg)))))
+
 ;; * Generic builder
 
 (defun mwb-build-full (exec-path path extra-env configuration
-                                 configuration-dir destination-dir libraries-dir)
+                                 configuration-dir destination-dir libraries-dir
+                                 &optional finished-fn)
   "Build Emacs in CONFIGURATION-DIR from sources in mwb-emacs-source and install
 it into DESTINATION-DIR.  EXEC-PATH, PATH and EXTRA-ENV would eventually get passed
 to mwb-command and used there."
-  (mwb-autogen exec-path path extra-env)
-  (mwb-configure exec-path path extra-env configuration configuration-dir destination-dir)
-  (mwb-make exec-path path extra-env configuration-dir)
-  (mwb-make-install exec-path path extra-env configuration configuration-dir)
-  (mwb-copy-libraries libraries-dir destination-dir))
+  (mwb-thread-cps
+   (mwb-autogen exec-path path extra-env)
+   (mwb-configure exec-path path extra-env configuration configuration-dir destination-dir)
+   (mwb-make exec-path path extra-env configuration-dir)
+   (mwb-make-install exec-path path extra-env configuration configuration-dir)
+   (mwb-copy-libraries libraries-dir destination-dir)
+   (funcall finished-fn)))
 
-(defun mwb-autogen (exec-path path extra-env)
-  (mwb-command exec-path path extra-env "./autogen.sh" mwb-emacs-source))
+(defmacro mwb-thread-cps (&rest forms)
+  "Thread FORMS elements wrapping each subsequent form into a lambda
+passed as the last argument into a prior form."
+  `(funcall (mwb-thread-cps-impl ,(reverse forms))))
 
-(defun mwb-configure (exec-path path extra-env configuration configuration-dir prefix)
+(defmacro mwb-thread-cps-impl (forms &optional k)
+  "Internal implementation for `mwb-thread-cps'."
+  (pcase forms
+    (`(,f . ,rest)
+     `(mwb-thread-cps-impl ,rest
+                          (lambda ()
+                            ,(if k
+                                 (append f (list k))
+                               f))))
+    (_ k)))
+
+(defun mwb-autogen (exec-path path extra-env k)
+  (mwb-command exec-path path extra-env "./autogen.sh" mwb-emacs-source k))
+
+(defun mwb-configure (exec-path path extra-env configuration configuration-dir prefix k)
   (mwb-command exec-path path (append extra-env (cadr (assoc 'configure-env configuration)))
                (concat "eval " mwb-emacs-source "/configure" " \""
                        (mapconcat 'identity (cadr (assoc 'configure-args configuration)) " ")
                        " --prefix="
                        (mwb-mingw-convert-path prefix) "\"")
-               configuration-dir))
+               configuration-dir k))
 
-(defun mwb-make (exec-path path extra-env configuration-dir)
+(defun mwb-make (exec-path path extra-env configuration-dir k)
   (mwb-command exec-path path extra-env
                (concat "make -j " (number-to-string mwb-make-threads))
-               configuration-dir))
+               configuration-dir k))
 
-(defun mwb-make-install (exec-path path extra-env configuration configuration-dir)
+(defun mwb-make-install (exec-path path extra-env configuration configuration-dir k)
   (mwb-command exec-path path extra-env
                (concat "make install"
                        (when (cadr (assoc 'install-strip configuration))
                          "-strip"))
-               configuration-dir))
+               configuration-dir k))
 
-(defun mwb-copy-libraries (libraries-dir destination-dir)
+(defun mwb-copy-libraries (libraries-dir destination-dir k)
   "Copies each library from MWB-DYNAMIC-LIBRARIES that exists in LIBRARIES-DIR
 into DESTINATION-DIR."
   (dolist (library mwb-dynamic-libraries)
     (dolist (library-file (directory-files libraries-dir t library))
-      (copy-file library-file (concat  destination-dir "/bin/") t))))
+      (copy-file library-file (concat  destination-dir "/bin/") t)))
+  (funcall k))
 
-(defun mwb-command (exec-path path extra-env command &optional dir)
+(defun mwb-get-sentinel(k)
+  (lambda (process event)
+    (if (and (not (null mwb-started)) (equal event "finished\n"))
+        (funcall k)
+      (progn
+        (message "mwb: Build operation failed. See mwb buffer for more details.")
+        (setq mwb-started nil)))))
+
+(defun mwb-command (exec-path path extra-env command &optional dir k)
   "Execute shell command COMMAND. Global exec-path is replaced with EXEC-PATH.
 EXTRA-ENV is added to process-environment passed to the process.  Path on it
 is replaced with PATH.  If DIR is passed, the command is ran in that directory."
@@ -126,7 +182,16 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
       (when (not (file-exists-p dir))
         (mkdir dir t))
       (cd dir))
-    (process-file-shell-command command nil "mwb")))
+    (let ((process (start-file-process-shell-command "mwb"
+                                                     (mwb-get-buffer) command)))
+      (set-process-sentinel process (mwb-get-sentinel k)))))
+
+(defun mwb-get-buffer ()
+  (let ((buffer (get-buffer-create "mwb")))
+    (with-current-buffer buffer
+      (when (not (eq major-mode 'compilation-mode))
+          (compilation-mode)))
+    buffer))
 
 ;; * MinGW
 (defun mwb-mingw-get-exec-path ()
@@ -148,63 +213,91 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
 (defun mwb-mingw-get-libraries-dir ()
   (concat mwb-mingw-directory "/bin/"))
 
-(defun mwb-mingw-ensure ()
+(defun mwb-mingw-ensure (k)
   "Ensure we have MinGW installed."
   ;; HACK: need a better check here.
-  (when (not (file-exists-p (concat mwb-mingw-directory "/msys/1.0/bin/bash.exe")))
-    (mwb-mingw-install)))
+  (if (not (file-exists-p (concat mwb-mingw-directory "/msys/1.0/bin/bash.exe")))
+      (mwb-mingw-install k)
+    (funcall k)))
 
-(defun mwb-mingw-install ()
-  (mwb-mingw-install-packages)
+(defun mwb-mingw-install (&optional k)
+  (let ((k (if k k (mwb-start))))
+    (mwb-mingw-install-packages (lambda () (mwb-mingw-post-extract k)))))
+
+(defun mwb-mingw-post-extract (k)
   (rename-file (concat mwb-mingw-directory "/msys/1.0/etc/" "fstab.sample")
                (concat mwb-mingw-directory "/msys/1.0/etc/" "fstab"))
-  ;; We have to do this in case of non-standard mwb-mingw-directory
   (with-current-buffer (find-file-noselect
                         (concat mwb-mingw-directory "/msys/1.0/etc/" "fstab") t)
     (replace-string "c:/MinGW" mwb-mingw-directory)
     (save-buffer)
-    (kill-buffer)))
+    (kill-buffer))
+  (when k
+    (funcall k)))
 
-(defun mwb-mingw-install-packages ()
+(defun mwb-mingw-install-packages (&optional k)
   "Install all packages from mwb-mingw-packages and mwb-msys-packages into mwb-mingw-directory."
-  (dolist (source-packages mwb-mingw-packages)
-    (mwb-mingw-install-packages-from-source source-packages mwb-mingw-directory))
-  (dolist (source-packages mwb-msys-packages)
-    (mwb-mingw-install-packages-from-source source-packages (concat mwb-mingw-directory "/msys/1.0/"))))
+  (let ((k (if k k (mwb-start)))
+        (packages '()))
+    (dolist (source-packages mwb-mingw-packages)
+      (setq packages (append packages (mwb-mingw-packages-from-source-packages source-packages mwb-mingw-directory))))
+    (dolist (source-packages mwb-msys-packages)
+      (setq packages (append packages (mwb-mingw-packages-from-source-packages source-packages (concat mwb-mingw-directory "/msys/1.0/")))))
+    (funcall (mwb-mingw-install-packages-cps (reverse packages) k))))
 
-(defun mwb-mingw-install-packages-from-source (source-packages directory)
+
+(defun mwb-mingw-packages-from-source-packages (source-packages directory)
   "Install packages from a list SOURCE-PACKAGES into DIRECTORY.
 SOURCE-PACKAGES should have the common download path as car and the list of packages as cdr."
-  (dolist (package (cadr source-packages))
-    (mwb-mingw-install-package (concat (car source-packages) package)
-                               directory)))
+  (mapcar (lambda (package)
+            (cons (concat (car source-packages) package) directory))
+          (cadr source-packages)))
 
-(defun mwb-mingw-install-package (package path)
+(defun mwb-mingw-install-packages-cps (packages k)
+  (if (eq nil packages) k
+    (mwb-mingw-install-packages-cps (cdr packages)
+                                    (lambda ()
+                                      (mwb-mingw-install-package (car (car packages))
+                                                                 (cdr (car packages)) k)))))
+
+(defun mwb-mingw-install-package (package path k)
   "Install PACKAGE by downloading it and puts it into PATH."
-  (mwb-7z-extract (mwb-wget-download-file package) path t))
-
+  (mwb-wget-download-file package (lambda (file) (mwb-7z-extract file path t k))))
 ;; * Msys2
 (defcustom mwb-msys2-x32-force nil
   "Forcefully install 32 bit version of msys2 on 64 it machines."
   :group 'mwb)
 
-(defun mwb-msys2-install ()
+(defun mwb-msys2-install-base (k)
   (let* ((install-x32 (if (or mwb-msys2-x32-force
                              (not (mwb-windows-is-64-bit))) t nil))
          (dir (if install-x32 mwb-msys2-x32-directory mwb-msys2-x64-directory))
          (dist (if install-x32 mwb-msys2-x32-dist mwb-msys2-x64-dist)))
-    (mwb-7z-extract (mwb-wget-download-file dist)
-                    (mapconcat 'identity (butlast (split-string dir "/")) "/") t)
-    (start-process-shell-command "msys2" "mwb" (concat dir "/msys2_shell.cmd"))
-    (sleep-for 30)))
+    (mwb-wget-download-file
+     dist
+     (lambda (file)
+       (mwb-7z-extract file
+                       (mapconcat 'identity (butlast (split-string dir "/")) "/")
+                       t
+                       (lambda ()
+                         (start-process-shell-command "msys2" "mwb" (concat dir "/msys2_shell.cmd"))
+                         (run-at-time "30 sec" nil k)))))))
 
-(defun mwb-msys2-install-packages (exec-path path extra-env packages)
-  (dolist (package packages)
-    (mwb-msys2-install-package exec-path path extra-env package)))
+(defun mwb-msys2-install-packages (exec-path path extra-env packages &optional k)
+  (let ((k (if k k (mwb-start))))
+        (funcall (mwb-msys2-install-packages-cps exec-path path extra-env (reverse packages) k))))
 
-(defun mwb-msys2-install-package (exec-path path extra-env package)
+(defun mwb-msys2-install-packages-cps (exec-path path extra-env packages k)
+  (if (eq nil packages) k
+    (mwb-msys2-install-packages-cps
+     exec-path path extra-env
+     (cdr packages)
+     (lambda ()
+       (mwb-msys2-install-package exec-path path extra-env (car packages) k)))))
+
+(defun mwb-msys2-install-package (exec-path path extra-env package k)
   (mwb-command exec-path path extra-env
-               (concat "pacman -S --noconfirm --needed " package)))
+               (concat "pacman -S --noconfirm --needed " package) nil k))
 
 (defun mwb-windows-is-64-bit ()
   "Determines whether Windows is 64 bit."
@@ -239,12 +332,19 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
 (defun mwb-msys2-x32-get-extra-env ()
   '("MSYSTEM=MINGW32" "PKG_CONFIG_PATH=/mingw32/lib/pkgconfig"))
 
-(defun mwb-msys2-x32-ensure ()
+(defun mwb-msys2-x32-ensure (k)
   ;; Need a much better check here...
-  (when (not (file-exists-p (mwb-msys2-get-current-directory)))
-    (mwb-msys2-install))
-  (mwb-msys2-install-packages (mwb-msys2-get-exec-path) (mwb-msys2-x32-get-path)
-                              (mwb-msys2-x32-get-extra-env) mwb-msys2-x32-packages))
+  (if (not (file-exists-p (mwb-msys2-get-current-directory)))
+      (mwb-msys2-x32-install k)
+    (funcall k)))
+
+(defun mwb-msys2-x32-install (&optional k)
+  (let ((k (if k k (mwb-start))))
+         (mwb-msys2-install-base
+          (lambda ()
+            (mwb-msys2-install-packages (mwb-msys2-get-exec-path) (mwb-msys2-x32-get-path)
+                                        (mwb-msys2-x32-get-extra-env) mwb-msys2-x32-packages
+                                        k)))))
 
 ;; ** x64
 (defun mwb-msys2-x64-get-path ()
@@ -254,25 +354,39 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
 (defun mwb-msys2-x64-get-extra-env ()
   '("MSYSTEM=MINGW64" "PKG_CONFIG_PATH=/mingw64/lib/pkgconfig"))
 
-(defun mwb-msys2-x64-ensure ()
+(defun mwb-msys2-x64-ensure (k)
   ;; Need a much better check here...
-  (when (not (file-exists-p mwb-msys2-x64-directory))
-    (mwb-msys2-install))
-  (mwb-msys2-install-packages (mwb-msys2-get-exec-path) (mwb-msys2-x64-get-path)
-                              (mwb-msys2-x64-get-extra-env) mwb-msys2-x64-packages))
+  (if (not (file-exists-p mwb-msys2-x64-directory))
+      (mwb-msys2-x64-install k)
+    (funcall k)))
+
+(defun mwb-msys2-x64-install (&optional k)
+  (let ((k (if k k (mwb-start))))
+        (mwb-msys2-install-base
+         (lambda ()
+           (mwb-msys2-install-packages (mwb-msys2-get-exec-path) (mwb-msys2-x64-get-path)
+                                       (mwb-msys2-x64-get-extra-env) mwb-msys2-x64-packages
+                                       k)))))
 
 ;; * 7zip
-(defun mwb-7z-extract (file path &optional keep)
+(defun mwb-7z-extract (file path &optional keep k)
   "Recursively extracts archives."
   (let* ((file-list (reverse (split-string file "\\.")))
          (recurse (member (cadr file-list) mwb-7z-archives-to-recurse))
          (extract-path (if recurse (file-name-directory file) path))
-         (new-file (substring file 0 (- (+ 1 (string-width (car file-list)))))))
-    (process-file-shell-command
-     (concat "\"" (mwb-get-7z) "\" x " file " -aoa -o"
-             (replace-regexp-in-string "/" "\\\\" extract-path)) nil "mwb")
+         (new-file (substring file 0 (- (+ 1 (string-width (car file-list))))))
+         (process
+          (start-file-process-shell-command "mwb" (mwb-get-buffer)
+                                            (concat "\"" (mwb-get-7z) "\" x " file " -aoa -o"
+                                                    (replace-regexp-in-string "/" "\\\\" extract-path)))))
+    (set-process-sentinel
+     process
+     (mwb-get-sentinel
+      (lambda ()
         (when (not keep) (delete-file file))
-    (when recurse (mwb-7z-extract new-file path))))
+        (funcall (if recurse
+                     (lambda () (mwb-7z-extract new-file path nil k))
+                    k)))))))
 
 (defvar mwb-7z-archives-to-recurse '("tar" "lzma"))
 
@@ -303,20 +417,25 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
 (defvar mwb-7z-x32-setup "http://www.7-zip.org/a/7z1602.exe")
 
 ;; * Wget
-(defun mwb-wget-download-file (file)
+(defun mwb-wget-download-file (file k)
   (let* ((local-file (concat mwb-wget-download-directory "/"
                              (car (reverse (split-string file "/")))))
+         (default-directory mwb-wget-download-directory)
          (wget (mwb-wget-get))
          (check-certificate (if (mwb-wget-check-certificate)
-                                "--no-check-certificate" "")))
-    (when (not (file-exists-p local-file))
-      (when (not (file-exists-p mwb-wget-download-directory))
-        (mkdir mwb-wget-download-directory t))
-      (cd mwb-wget-download-directory)
-      (process-file-shell-command
-       (concat "\"" wget
-               "\" " check-certificate " " file) nil "mwb"))
-    local-file))
+                                "--no-check-certificate" ""))
+         (k (lambda () (funcall k local-file))))
+    (if (not (file-exists-p local-file))
+        (progn
+          (when (not (file-exists-p mwb-wget-download-directory))
+            (mkdir mwb-wget-download-directory t))
+          (let ((process
+                 (start-file-process-shell-command
+                  "mwb" (mwb-get-buffer)
+                  (concat "\"" wget
+                          "\" " check-certificate " " file))))
+            (set-process-sentinel process (mwb-get-sentinel k))))
+      (funcall k))))
 
 (defun mwb-wget-get ()
   "Ensure we have wget on our path for downloading dependencies.
