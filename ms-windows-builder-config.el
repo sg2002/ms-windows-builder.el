@@ -127,7 +127,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
       "pthreads-w32/pthreads-w32-2.9.1/pthreads-w32-2.9.1-1-mingw32-dll.tar.lzma"
       "pthreads-w32/pthreads-w32-2.9.1/pthreads-w32-2.9.1-1-mingw32-dev.tar.lzma"
       "gettext/gettext-0.18.3.2-2/gettext-0.18.3.2-2-mingw32-dev.tar.xz"
-      "gcc/Version5/gcc-5.3.0-2/gcc-core-5.3.0-2-mingw32-bin.tar.xz"
+      "gcc/Version5/gcc-5.3.0-3/gcc-core-5.3.0-3-mingw32-bin.tar.xz"
       ;; Newer libiconv is available, but we still use this one, because that's
       ;; what ezwinports libxml is linked against.
       "libiconv/libiconv-1.13.1-1/libiconv-1.13.1-1-mingw32-dev.tar.lzma"))
