@@ -251,5 +251,13 @@ Currently it only allows to limit use of specific arguments by toolchains."
     "librsvg-.*\\.dll")
   "Dynamic libraries to copy into the installation dir.")
 
+(defvar mwb-unzip-dist "http://stahlworks.com/dev/unzip.exe")
+
+(defvar mwb-unzip-paths '(mwb-wget-download-directory "c:/Program Files (x86)/GnuWin32/bin" "c:/Program Files/GnuWin32/bin"))
+
+(defvar mwb-libarchive-dist "https://sourceforge.net/projects/ezwinports/files/libarchive-3.3.1-w32-bin.zip")
+
+(defvar mwb-libarchive-paths '("c:/Program Files (x86)" "c:/Program Files" mwb-wget-download-directory))
+
 (provide 'ms-windows-builder-config)
 ;;; ms-windows-builder-config.el ends here

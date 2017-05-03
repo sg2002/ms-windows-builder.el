@@ -89,9 +89,9 @@ mwb-confugration-args for them."
                           (format-time-string "%T"
                                               (time-subtract (current-time) start-time) t)))
             (inhibit-read-only t))
-            (with-current-buffer (mwb-get-buffer)
-               (insert msg))
-            (message msg)))))
+        (with-current-buffer (mwb-get-buffer)
+          (insert msg))
+        (message msg)))))
 
 ;; * Generic builder
 
@@ -262,7 +262,7 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
 
 (defun mwb-mingw-install-package (package path k)
   "Install PACKAGE by downloading it and puts it into PATH."
-  (mwb-wget-download-file package (lambda (file) (mwb-7z-extract file path t k))))
+  (mwb-wget-download-file package (lambda (file) (mwb-extract file path k))))
 ;; * Msys2
 (defcustom mwb-msys2-x32-force nil
   "Forcefully install 32 bit version of msys2 on 64 it machines."
@@ -276,9 +276,8 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
     (mwb-wget-download-file
      dist
      (lambda (file)
-       (mwb-7z-extract file
+       (mwb-extract file
                        (mapconcat 'identity (butlast (split-string dir "/")) "/")
-                       t
                        (lambda ()
                          (start-process-shell-command "msys2" "mwb" (concat dir "/msys2_shell.cmd"))
                          (run-at-time "30 sec" nil k)))))))
@@ -330,7 +329,7 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
   (concat "/mingw32/bin:" (mwb-msys2-get-common-path)))
 
 (defun mwb-msys2-x32-get-extra-env ()
-  '("MSYSTEM=MINGW32" "PKG_CONFIG_PATH=/mingw32/lib/pkgconfig"))
+  '("MSYSTEM=MINGW32"))
 
 (defun mwb-msys2-x32-ensure (k)
   ;; Need a much better check here...
@@ -352,7 +351,7 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
 
 
 (defun mwb-msys2-x64-get-extra-env ()
-  '("MSYSTEM=MINGW64" "PKG_CONFIG_PATH=/mingw64/lib/pkgconfig"))
+  '("MSYSTEM=MINGW64"))
 
 (defun mwb-msys2-x64-ensure (k)
   ;; Need a much better check here...
@@ -368,56 +367,86 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
                                        (mwb-msys2-x64-get-extra-env) mwb-msys2-x64-packages
                                        k)))))
 
-;; * 7zip
-(defun mwb-7z-extract (file path &optional keep k)
+;; * bsdtar
+(defun mwb-extract (file path &optional k)
   "Recursively extracts archives."
-  (let* ((file-list (reverse (split-string file "\\.")))
-         (recurse (member (cadr file-list) mwb-7z-archives-to-recurse))
-         (extract-path (if recurse (file-name-directory file) path))
-         (new-file (substring file 0 (- (+ 1 (string-width (car file-list))))))
-         (process
-          (start-file-process-shell-command "mwb" (mwb-get-buffer)
-                                            (concat "\"" (mwb-get-7z) "\" x " file " -aoa -o"
-                                                    (replace-regexp-in-string "/" "\\\\" extract-path)))))
-    (set-process-sentinel
-     process
-     (mwb-get-sentinel
-      (lambda ()
-        (when (not keep) (delete-file file))
-        (funcall (if recurse
-                     (lambda () (mwb-7z-extract new-file path nil k))
-                    k)))))))
+  (let ((k (if k k (mwb-start))))
+    (mwb-get-bsdtar
+     (lambda (bsdtar)
+       (when (not (file-exists-p path))
+            (mkdir path t))
+       (let* ((default-directory path)
+              (process
+               (start-file-process-shell-command
+                "mwb" (mwb-get-buffer)
+                (concat "\"" bsdtar "\" -xf " file))))
+         (set-process-sentinel
+          process
+          (mwb-get-sentinel
+           (lambda () (funcall k)))))))))
 
-(defvar mwb-7z-archives-to-recurse '("tar" "lzma"))
+(defvar mwb-bsdtar-archives-to-recurse '("tar" "lzma"))
 
-(defun mwb-get-7z ()
-  "Ensure we have 7zip on our path for unarchiving."
-  (or (executable-find "7z.exe")
-      (locate-file "7z.exe" mwb-7z-paths)
-      (mwb-install-7z)))
+(defun mwb-get-bsdtar (k)
+  "Ensure we have bsdtar on our path for unarchiving."
+  (let ((bsdtar (mwb-locate-bsdtar)))
+    (if bsdtar (funcall k bsdtar)
+      (mwb-libarchive-install k))))
 
-(defun mwb-install-7z ()
-  (let ((setup-file (mwb-wget-download-file (if (mwb-windows-is-64-bit)
-                                                mwb-7z-x64-setup
-                                              mwb-7z-x32-setup)))
-        (setup-dir (concat "\""
-                           (replace-regexp-in-string
-                            "/"
-                            "\\\\"
-                            "c:/Program Files/7-Zip/")
-                           "\"")))
-  (process-file-shell-command
-   (concat setup-file " /S  /D=" setup-dir) nil "mwb")
-  (locate-file "7z.exe" mwb-7z-paths)))
+(defun mwb-libarchive-install (&optional k)
+  (let* ((finished-fn (if k nil (mwb-start)))
+         (k (if k k
+              (lambda (bsdtar) (funcall finished-fn))))
+         (install-dir (mwb-libarchive-get-install-directory)))
+    (mwb-get-unzip
+     (lambda (unzip)
+       (mwb-wget-download-file
+        mwb-libarchive-dist
+        (lambda (libarchive-dist)
+          (let ((inhibit-read-only t))
+            (process-file-shell-command
+             (concat "\"" unzip "\" -x " libarchive-dist " -d " install-dir) nil "mwb"))
+          (funcall k (mwb-locate-bsdtar))))))))
 
-(defvar mwb-7z-paths '("c:/Program Files/7-Zip/" "c:/Program Files (x86)/7-Zip/"))
+(defun mwb-locate-bsdtar ()
+  "Locate bsdtar executable."
+  (or (executable-find "bsdtar.exe")
+      (locate-file "bsdtar.exe" (mapcar (lambda (path) (concat path "/libarchive/bin"))
+                                        (mwb-get-paths-from-vars mwb-libarchive-paths)))))
 
-(defvar mwb-7z-x64-setup "http://www.7-zip.org/a/7z1602-x64.exe")
+(defun mwb-libarchive-get-install-directory (&optional paths)
+  "Find a path where creating a new directory for libarchive is permitted.
+If PATHS is not specified start with mwb-libarchive-paths."
+  (let ((paths (if paths paths (mwb-get-paths-from-vars mwb-libarchive-paths))))
+    (condition-case err
+        (let ((directory (concat (car paths)
+                                 "/libarchive")))
+          (when (not (file-exists-p directory))
+            (mkdir directory (if (eq directory mwb-wget-download-directory) t nil)))
+          directory)
+      (error (mwb-libarchive-get-install-directory (cdr paths))))))
 
-(defvar mwb-7z-x32-setup "http://www.7-zip.org/a/7z1602.exe")
+(defun mwb-get-unzip (k)
+  "Ensure we have unzip on our path for unarchiving and then call continuation K."
+  (let ((unzip (mwb-locate-unzip)))
+    (if unzip unzip
+        (mwb-wget-download-file mwb-unzip-dist k))))
+
+(defun mwb-locate-unzip ()
+  "Locate unzip execautable."
+  (or (executable-find "unzip.exe")
+      (locate-file "unzip.exe" (mwb-get-paths-from-vars mwb-unzip-paths))
+      nil))
+
+(defun mwb-get-paths-from-vars (paths)
+  "In a list PATHS replace all symbols with their values."
+  (mapcar (lambda (path) (if (symbolp path)
+                             (symbol-value path)
+                           path)) paths))
 
 ;; * Wget
 (defun mwb-wget-download-file (file k)
+  "Download FILE using wget and then call continuation K."
   (let* ((local-file (concat mwb-wget-download-directory "/"
                              (car (reverse (split-string file "/")))))
          (default-directory mwb-wget-download-directory)
@@ -442,7 +471,7 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
 Wget works nicely, since it's able to get stuff from sourceforge."
   (let ((wget (or (executable-find "wget.exe")
               (locate-file "wget.exe" mwb-wget-paths)
-              (error "Wget not found."))))
+              (error "Wget not found"))))
     wget))
 
 (defun mwb-wget-check-certificate ()
