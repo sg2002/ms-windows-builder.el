@@ -25,8 +25,10 @@
 
 ;; * Main
 (defun mwb-build (selected-toolchain make-path output-path &optional configuration)
-  "Build Emacs using SELECTED-BUILD, which should be defined in mwb-builds. Run
-configure and make in MAKE-PATH. Install Emacs into OUTPUT-PATH."
+  "Build Emacs using SELECTED-TOOLCHAIN, which should be defined in mwb-builds.
+Run configure and make in MAKE-PATH.  Install Emacs into OUTPUT-PATH.
+If CONFIGURATION is specified use it, otherwise use mwb-default-configuration.
+CONFIGURATION should be defined in mwb-configurations."
   (let ((fininshed-fn (mwb-start))
         (toolchain (cadr (assoc selected-toolchain mwb-toolchains)))
         (selected-configuration
@@ -101,13 +103,15 @@ mwb-confugration-args for them."
   "Build Emacs in CONFIGURATION-DIR from sources in mwb-emacs-source and install
 it into DESTINATION-DIR.  EXEC-PATH, PATH and EXTRA-ENV would eventually get passed
 to mwb-command and used there."
-  (mwb-thread-cps
-   (mwb-autogen exec-path path extra-env)
-   (mwb-configure exec-path path extra-env configuration configuration-dir destination-dir)
-   (mwb-make exec-path path extra-env configuration-dir)
-   (mwb-make-install exec-path path extra-env configuration configuration-dir)
-   (mwb-copy-libraries libraries-dir destination-dir)
-   (funcall finished-fn)))
+  (let ((temp-destination-dir (make-temp-name destination-dir)))
+    (mwb-thread-cps
+     (mwb-autogen exec-path path extra-env)
+     (mwb-configure exec-path path extra-env configuration configuration-dir temp-destination-dir)
+     (mwb-make exec-path path extra-env configuration-dir)
+     (mwb-make-install exec-path path extra-env configuration configuration-dir)
+     (mwb-copy-libraries libraries-dir temp-destination-dir)
+     (mwb-replace-destination destination-dir temp-destination-dir)
+     (funcall finished-fn))))
 
 (defmacro mwb-thread-cps (&rest forms)
   "Thread FORMS elements wrapping each subsequent form into a lambda
@@ -154,6 +158,22 @@ into DESTINATION-DIR."
   (dolist (library mwb-dynamic-libraries)
     (dolist (library-file (directory-files libraries-dir t library))
       (copy-file library-file (concat  destination-dir "/bin/") t)))
+  (funcall k))
+
+(defun mwb-replace-destination (destination-dir temp-destination-dir k)
+  "Move Emacs into the final destination.
+Check if DESTINATION-DIR already contains Emacs and that Emacs is not currently
+running.  If so, replace it with a newly built one from TEMP-DESTINATION-DIR.
+Then call continuation K."
+  (condition-case err
+      (let* ((bin-name (concat destination-dir "/bin"))
+             (temp-name (make-temp-name bin-name)))
+        (rename-file bin-name temp-name)
+        (rename-file temp-name bin-name)
+        (copy-directory temp-destination-dir destination-dir t t t)
+        (delete-directory temp-destination-dir t))
+    (error (message "Could not replace Emacs in %s with newly built Emacs in %s"
+                    destination-dir temp-destination-dir)))
   (funcall k))
 
 (defun mwb-get-sentinel(k)
