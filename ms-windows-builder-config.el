@@ -147,22 +147,19 @@ Currently it only allows to limit use of specific arguments by toolchains."
 (defvar mwb-mingw-packages
   '(("https://sourceforge.net/projects/mingw/files/MinGW/Base/"
      ("binutils/binutils-2.25.1/binutils-2.25.1-1-mingw32-bin.tar.xz"
-      ;;"mingwrt/mingwrt-3.22/mingwrt-3.22.4-mingw32-dll.tar.xz"
-      ;;"mingwrt/mingwrt-3.22/mingwrt-3.22.4-mingw32-dev.tar.xz"
-      ;;"w32api/w32api-3.18/w32api-3.18.2-mingw32-dev.tar.xz"
+      "mingwrt/mingwrt-5.0/mingwrt-5.0-mingw32-dll.tar.xz"
+      "mingwrt/mingwrt-5.0/mingwrt-5.0-mingw32-dev.tar.xz "
+      "w32api/w32api-5.0/w32api-5.0-mingw32-dev.tar.xz"
       ;; Building with libxml and glib(both required for svg image support)
       ;; would fail with newer mingwrt and w32api.
       ;; This was fixed in 34b6df1, but if you're building up to and including 25.1
       ;; use these older versions:
-      "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dll.tar.xz"
-      "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dev.tar.xz"
-      "w32api/w32api-3.17/w32api-3.17-2-mingw32-dev.tar.lzma"
+      ;; "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dll.tar.xz"
+      ;; "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dev.tar.xz"
+      ;; "w32api/w32api-3.17/w32api-3.17-2-mingw32-dev.tar.lzma"
       "mpc/mpc-1.0.2/libmpc-1.0.2-mingw32-dll-3.tar.xz"
       "mpfr/mpfr-3.1.2-2/mpfr-3.1.2-2-mingw32-dll.tar.lzma"
       "gmp/gmp-5.1.2/gmp-5.1.2-1-mingw32-dll.tar.lzma"
-      ;; Pthreads is no longer required by gcc and does not get installed with it by mingw-get, but it's still required by ld.
-      "pthreads-w32/pthreads-w32-2.9.1/pthreads-w32-2.9.1-1-mingw32-dll.tar.lzma"
-      "pthreads-w32/pthreads-w32-2.9.1/pthreads-w32-2.9.1-1-mingw32-dev.tar.lzma"
       "gettext/gettext-0.18.3.2-2/gettext-0.18.3.2-2-mingw32-dev.tar.xz"
       "gcc/Version5/gcc-5.3.0-3/gcc-core-5.3.0-3-mingw32-bin.tar.xz"
       ;; Newer libiconv is available, but we still use this one, because that's
@@ -171,6 +168,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
     ("https://sourceforge.net/projects/ezwinports/files/"
      ("pkg-config-0.28-w32-bin.zip"
       "zlib-1.2.8-2-w32-bin.zip"
+      "libxml2-2.7.8-w32-bin.zip"
       ;; Gnutls
       "p11-kit-0.9-w32-bin.zip"
       "libidn-1.29-w32-bin.zip"

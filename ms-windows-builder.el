@@ -535,7 +535,7 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
 
 (defun mwb-locate-bsdtar ()
   "Locate bsdtar executable."
-  (or ;;(executable-find "bsdtar.exe")
+  (or (executable-find "bsdtar.exe")
       (locate-file "bsdtar.exe" (mapcar (lambda (path) (concat path "libarchive/bin"))
                                         (mwb-get-paths-from-vars mwb-libarchive-paths)))))
 
@@ -559,7 +559,7 @@ If PATHS is not specified start with mwb-libarchive-paths."
 
 (defun mwb-locate-unzip ()
   "Locate unzip execautable."
-  (or ;;(executable-find "unzip.exe")
+  (or (executable-find "unzip.exe")
       (locate-file "unzip.exe" (mwb-get-paths-from-vars mwb-unzip-paths))
       nil))
 
