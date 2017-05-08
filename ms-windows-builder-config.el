@@ -23,27 +23,42 @@
 ;; This file contains variables used for configuring ms-windows-builder.
 
 ;;; Code:
-(defcustom mwb-emacs-source "c:/Emacs/source"
+(defcustom mwb-emacs-source "c:/Emacs/source/"
   "*Directory that contains Emacs source code."
   :group 'mwb
   :type 'directory)
 
-(defcustom mwb-mingw-directory "c:/Emacs/MinGW"
+(defcustom mwb-configurations-directory "c:/Emacs/configurations/"
+  "*Directory where MWB should place Emacs build configurations."
+  :group 'mwb
+  :type 'directory)
+
+(defcustom mwb-mingw-directory "c:/Emacs/MinGW/"
   "* Place to check for MinGW and install it if it's not present."
   :group 'mwb
   :type 'directory)
 
-(defcustom mwb-msys2-x32-directory "c:/Emacs/msys32"
+(defcustom mwb-msys2-x32-directory "c:/Emacs/msys32/"
   "* Place to check for 32 bit msys2 and install it if it's not present."
   :group 'mwb
   :type 'directory)
 
-(defcustom mwb-msys2-x64-directory "c:/Emacs/msys64"
+(defcustom mwb-msys2-x64-directory "c:/Emacs/msys64/"
   "* Place to check for MinGW and install it if it's not present."
   :group 'mwb
   :type 'directory)
 
-(defcustom mwb-wget-download-directory "c:/Emacs/downloads"
+(defcustom mwb-cygwin-x32-directory "c:/Emacs/cygwin32/"
+  "* Place to check for 32 bit cygwin and install it if it's not present."
+  :group 'mwb
+  :type 'directory)
+
+(defcustom mwb-cygwin-x64-directory "c:/Emacs/cygwin64/"
+  "* Place to check for MinGW and install it if it's not present."
+  :group 'mwb
+  :type 'directory)
+
+(defcustom mwb-wget-download-directory "c:/Emacs/downloads/"
   "*Directory to put files downloaded by wget."
   :group 'mwb
   :type 'directory)
@@ -53,17 +68,32 @@
             (get-exec-path-fn mwb-mingw-get-exec-path)
             (get-path-fn mwb-mingw-get-path)
             (get-extra-env-fn mwb-mingw-get-extra-env)
-            (get-libraries-dir-fn mwb-mingw-get-libraries-dir)))
-    (msys2-x32 ((ensure-fn mwb-msys2-x32-ensure)
-                (get-exec-path-fn mwb-msys2-get-exec-path)
-                (get-path-fn mwb-msys2-x32-get-path)
-                (get-extra-env-fn mwb-msys2-x32-get-extra-env)
-                (get-libraries-dir-fn mwb-msys2-get-libraries-dir)))
+            (get-libraries-dir-fn mwb-mingw-get-libraries-dir)
+            (get-libraries-fn mwb-mingw-get-libraries)))
     (msys2-x64 ((ensure-fn mwb-msys2-x64-ensure)
                 (get-exec-path-fn mwb-msys2-get-exec-path)
                 (get-path-fn mwb-msys2-x64-get-path)
                 (get-extra-env-fn mwb-msys2-x64-get-extra-env)
-                (get-libraries-dir-fn mwb-msys2-get-libraries-dir))))
+                (get-libraries-dir-fn mwb-msys2-x64-get-libraries-dir)
+                (get-libraries-fn mwb-msys2-get-libraries)))
+    (msys2-x32 ((ensure-fn mwb-msys2-x32-ensure)
+                (get-exec-path-fn mwb-msys2-get-exec-path)
+                (get-path-fn mwb-msys2-x32-get-path)
+                (get-extra-env-fn mwb-msys2-x32-get-extra-env)
+                (get-libraries-dir-fn mwb-msys2-x32-get-libraries-dir)
+                (get-libraries-fn mwb-msys2-get-libraries)))
+    (cygwin-x64 ((ensure-fn mwb-cygwin-x64-ensure)
+                 (get-exec-path-fn mwb-cygwin-x64-get-exec-path)
+                 (get-path-fn mwb-cygwin-get-path)
+                 (get-extra-env-fn mwb-mingw-get-extra-env)
+                 (get-libraries-dir-fn mwb-cygwin-x64-get-libraries-dir)
+                 (get-libraries-fn mwb-cygwin-get-libraries)))
+    (cygwin-x32 ((ensure-fn mwb-cygwin-x32-ensure)
+                 (get-exec-path-fn mwb-cygwin-x32-get-exec-path)
+                 (get-path-fn mwb-cygwin-get-path)
+                 (get-extra-env-fn mwb-mingw-get-extra-env)
+                 (get-libraries-dir-fn mwb-cygwin-x32-get-libraries-dir)
+                 (get-libraries-fn mwb-cygwin-get-libraries))))
   "List of possbile builds for building Emacs.")
 
 (defcustom mwb-configurations
@@ -71,27 +101,33 @@
      ((configure-env ("CFLAGS=-O0 -gdwarf-2 -g3"))
       (configure-args ("--without-imagemagick"
                        "--with-wide-int"
+                       "--with-w32"
                        "--enable-checking='yes,glyphs'"
                        "--enable-check-lisp-object-type"))))
     (debug-with-modules
      ((configure-env ("CFLAGS=-O0 -gdwarf-2 -g3"))
       (configure-args ("--without-imagemagick"
                        "--with-wide-int"
+                       "--with-w32"
                        "--enable-checking='yes,glyphs'"
                        "--enable-check-lisp-object-type"
                        "--with-modules"))))
     (release
      ((configure-env ("CFLAGS=-O2 -gdwarf-4 -g3"))
       (configure-args ("--without-imagemagick"
-                       "--with-wide-int"))
+                       "--with-wide-int"
+                       "--with-w32"))
       (install-strip t)))
     (release-with-modules
      ((configure-env ("CFLAGS=-O2 -gdwarf-4 -g3"))
       (configure-args ("--without-imagemagick"
                        "--with-wide-int"
+                       "--with-w32"
                        "--with-modules"))
       (install-strip t))))
-  "*List of possible configurations."
+  "*List of possible configurations.
+Flags that are not used with a particular toolchain get
+filtered later, using mwb-configuration-args."
   :group 'mwb)
 
 (defcustom mwb-default-configuration 'debug
@@ -99,7 +135,8 @@
   :group 'mwb)
 
 (defcustom mwb-configuration-args
-  '(("--with-wide-int" ((toolchains (mingw msys2-x32)))))
+  '(("--with-wide-int" ((toolchains (mingw msys2-x32))))
+    ("--with-w32" ((toolchains (cygwin-x64 cygwin-x32)))))
   "*Possible options for a specific configuration argument.
 Currently it only allows to limit use of specific arguments by toolchains."
   :group 'mwb)
@@ -200,6 +237,14 @@ Currently it only allows to limit use of specific arguments by toolchains."
       "autoconf-2.65-msys-bin.zip"
       "texinfo-6.3-w32-bin.zip"))))
 
+(defvar mwb-msys2-x64-packages '("base-devel" "mingw-w64-x86_64-toolchain"
+                                 "mingw-w64-x86_64-libxml2" "mingw-w64-x86_64-gnutls"
+                                 "mingw-w64-x86_64-xpm-nox" "mingw-w64-x86_64-libtiff"
+                                 "mingw-w64-x86_64-giflib" "mingw-w64-x86_64-libpng"
+                                 "mingw-w64-x86_64-libjpeg-turbo" "mingw-w64-x86_64-librsvg"))
+
+(defvar mwb-msys2-x64-dist
+  "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20161025.tar.xz")
 
 (defvar mwb-msys2-x32-packages '("base-devel" "mingw-w64-i686-toolchain"
                                  "mingw-w64-i686-libxml2" "mingw-w64-i686-gnutls"
@@ -210,38 +255,40 @@ Currently it only allows to limit use of specific arguments by toolchains."
 (defvar mwb-msys2-x32-dist
   "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20161025.tar.xz")
 
+(defvar mwb-cygwin-x64-dist
+  "https://cygwin.com/setup-x86_64.exe")
 
-(defvar mwb-msys2-x64-packages '("base-devel" "mingw-w64-x86_64-toolchain"
-                                 "mingw-w64-x86_64-libxml2" "mingw-w64-x86_64-gnutls"
-                                 "mingw-w64-x86_64-xpm-nox" "mingw-w64-x86_64-libtiff"
-                                 "mingw-w64-x86_64-giflib" "mingw-w64-x86_64-libpng"
-                                 "mingw-w64-x86_64-libjpeg-turbo" "mingw-w64-x86_64-librsvg"))
+(defvar mwb-cygwin-x32-dist
+  "https://cygwin.com/setup-x86.exe")
 
-(defvar mwb-msys2-x64-dist
-  "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20161025.tar.xz")
+(defvar mwb-cygwin-site
+  "http://mirrors.kernel.org/sourceware/cygwin/")
+
+(defvar mwb-cygwin-packages
+  '("automake" "autoconf" "make" "gcc-core" "libgnutls-devel"
+    "libncurses-devel" "libgif-devel" "libjpeg-devel" "libpng-devel"
+    "libtiff-devel" "libX11-devel" "libXpm-noX-devel" "libxml2-devel"))
 
 (defcustom mwb-dynamic-libraries
   '(;; libwinpthread is needed for msys2 only, it can be linked statically
     ;; by passing CFLAGS= -static to the configure script.
     "libwinpthread-.*\\.dll"
-    "libgcc_s_seh-.*\\.dll"
     ;; "libdbus-.*\\.dll"
     "zlib.*\\.dll" ; used by emacs for compression, also by libcroco
-    "liblzma-.*\\.dll" ;; required by libxml2 and libtiff
+    "lzma-.*\\.dll" ;; required by libxml2 and libtiff
     ;; XML support library, required for HTML and XML support in Emacs
     ;; also required by rsvg
-    "libxml2-.*\\.dll"
+    "xml2-.*\\.dll"
     ;; Gnutls
-    "libffi-.*\\.dll" ; only needed for msys2-based builds
-    "libgmp-.*\\.dll" "libgnutls-[0-9].\\.dll" "libhogweed-.*\\.dll"
-    "libiconv-.*\\.dll" "libidn-.*\\.dll" "libintl-.*\\.dll"
-    "libnettle-.*\\.dll" "libp11-kit-.*\\.dll" "libtasn1-.*\\.dll"
+    "gmp-.*\\.dll" "gnutls-[0-9].\\.dll" "hogweed-.*\\.dll"
+    "iconv-.*\\.dll" "idn.*\\.dll" "intl-.*\\.dll"
+    "nettle-.*\\.dll" "p11-kit-.\\.dll" "tasn1-.*\\.dll"
     ;; Images
-    "libgif-.*\\.dll" ; gif images
-    "libjpeg-.*\\.dll" ; jpeg images
-    "libpng.*\\.dll" ; png images, also required by libcroco and libgdk_pixbuf
-    "libtiff-.*\\.dll" ; tiff images
-    "libXpm-noX.*\\.dll" ; xpm images
+    "gif-.*\\.dll" ; gif images
+    "\\(cyg\\|lib\\)jpeg-.*\\.dll" ; jpeg images
+    "png.*\\.dll" ; png images, also required by libcroco and libgdk_pixbuf
+    "tiff-.*\\.dll" ; tiff images
+    "Xpm-noX.*\\.dll" ; xpm images
     ;; svg images
     "libpcre-.*\\.dll" "libglib-.*\\.dll" "libgmodule-.*\\.dll" "libgobject-.*\\.dll"
     "libgio-.*\\.dll" "libexpat-.*\\.dll" "libfontconfig-.*\\.dll""libbz2-.*\\.dll"
@@ -251,13 +298,32 @@ Currently it only allows to limit use of specific arguments by toolchains."
     "librsvg-.*\\.dll")
   "Dynamic libraries to copy into the installation dir.")
 
+(defcustom mwb-cygwin-dynamic-libraries
+  '("cyggcc_s-.*\\.dll"
+    "cygwin.*\\.dll"
+    "cygz.dll"
+    "cygncursesw.*\\.dll"
+    "cygunistring-.*\\.dll"
+    "cygjbig-.*\\.dll"
+    "cygX11-.*\\.dll"
+    "cygxcb-.*\\.dll"
+    "cygXau-.*\\.dll"
+    "cygXdmcp-.*\\.dll"
+    "ffi-.*\\.dll")
+  "Dynamic libraries to copy into the installation dir during cygwin builds.")
+
+(defcustom mwb-msys2-dynamic-libraries
+  '("libgcc_s_.*\\.dll"
+    "ffi-.*\\.dll")
+  "Dynamic libraries to copy into the installation dir during msys2 builds.")
+
 (defvar mwb-unzip-dist "http://stahlworks.com/dev/unzip.exe")
 
-(defvar mwb-unzip-paths '(mwb-wget-download-directory "c:/Program Files (x86)/GnuWin32/bin" "c:/Program Files/GnuWin32/bin"))
+(defvar mwb-unzip-paths '("c:/Program Files (x86)/GnuWin32/bin/" "c:/Program Files/GnuWin32/bin/" mwb-wget-download-directory))
 
 (defvar mwb-libarchive-dist "https://sourceforge.net/projects/ezwinports/files/libarchive-3.3.1-w32-bin.zip")
 
-(defvar mwb-libarchive-paths '("c:/Program Files (x86)" "c:/Program Files" mwb-wget-download-directory))
+(defvar mwb-libarchive-paths '("c:/Program Files (x86)/" "c:/Program Files/" mwb-wget-download-directory))
 
 (provide 'ms-windows-builder-config)
 ;;; ms-windows-builder-config.el ends here

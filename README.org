@@ -10,7 +10,7 @@ Path for GnuWin version is already set up.
 Anything downloaded by this script using wget gets stored to
 mwb-wget-download-directory and reused if it's already there.
 
-7Zip would get installed, unless it's already present on your PATH.
+Bsdtar would get installed, unless it's already present on your PATH.
 ** Usage
 Make sure that, depending on the build, mwb-mingw-directory, mwb-msys2-64-directory or mwb-msys2-32-directory is writable and mwb-emacs-source points to Emacs source repository.  Put the script on your load path and do:
 #+BEGIN_SRC emacs-lisp
@@ -21,21 +21,32 @@ Then use the build function.
 
 For MinGW:
 #+BEGIN_SRC emacs-lisp
-(mwb-build 'mingw "c:/Emacs/configs/mingw" "c:/Emacs/25-dev-mingw")
+(mwb-build 'mingw "c:/Emacs/25-dev-mingw")
 #+end_src
+
 For Msys2-x32:
 #+BEGIN_SRC emacs-lisp
-(mwb-build 'msys2-x32  "c:/Emacs/configs/msys2-x32" "c:/Emacs/25-dev-msys2-x32")
+(mwb-build 'msys2-x32 "c:/Emacs/25-dev-msys2-x32")
 #+end_src
 
 For Msys2-x64:
 #+BEGIN_SRC emacs-lisp
-(mwb-build 'msys2-x64  "c:/Emacs/configs/msys2-x64" "c:/Emacs/25-dev-msys2-x64")
+(mwb-build 'msys2-x64 "c:/Emacs/25-dev-msys2-x64")
+#+end_src
+
+For Cygwin-x32:
+#+BEGIN_SRC emacs-lisp
+(mwb-build 'cygwin-x32 "c:/Emacs/25-dev-cygwin-x32")
+#+end_src
+
+For Cygwin-x64:
+#+BEGIN_SRC emacs-lisp
+(mwb-build 'cygwin-x64 "c:/Emacs/25-dev-cygwin-x64")
 #+end_src
 
 You can also specify a specific build configuration:
 #+BEGIN_SRC emacs-lisp
-(mwb-build 'msys2-x64  "c:/Emacs/configs/msys2-x64" "c:/Emacs/25-dev-msys2-x64" 'release)
+(mwb-build 'msys2-x64 "c:/Emacs/25-dev-msys2-x64" 'release)
 #+end_src
 Configurations are defined in mwb-configurations. If no configuration is specified, mwb-default-configuration is used.
 
@@ -43,9 +54,11 @@ Full build starting from the toolchain setup would take at least 30 minutes.
 *** Msys2 specific
 During msys2 setup you would get a shell window.  You can close it after it's done with setup and you see the command prompt.
 ** Known issues
-If you have MinGW already installed and try to use the same location, but it does not have all of the required components, this script would break.  You can manually install components into existing toolchain using (mwb-mingw-install-packages).  This script assumes that your Msys is installed within the MinGW tree. Otherwise, installing a different MinGW using this script is highly recommended.
+If you have MinGW already installed and try to use the same location, but it does not have all of the required components, the build would break.  You can manually install components into an existing directory using (mwb-mingw-install-packages).  This script assumes that your Msys is installed within the MinGW tree.  Otherwise, installing a different MinGW using this script is highly recommended.
 
 For Msys it should install all packages, you can also do it manually using (mwb-msys2-install-packages).
+
+For Cygwin the build would break if you have it already installed and try to use the same location, but it does not have all of the required components.  You can manually install packages into the existing cygwin installation by evaluating (mwb-cygwin-install 'x32) for x32 and (mwb-cygwin-install 'x64) for x64.  Cygwin is built --with-w32 and there is not svg image support.
 ** Troubleshooting
 All output gets saved to "mwb" buffer.
 
