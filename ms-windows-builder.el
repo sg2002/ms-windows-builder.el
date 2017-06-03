@@ -206,23 +206,24 @@ Then call continuation K."
   "Execute shell command COMMAND. Global exec-path is replaced with EXEC-PATH.
 EXTRA-ENV is added to process-environment passed to the process.  Path on it
 is replaced with PATH.  If DIR is passed, the command is ran in that directory."
-  (let* ((shell-file-name "bash")
-         ;; By using lexical binding we can use setenv and getenv
-         ;; on our local version of process-environment.
-         (process-environment (append process-environment extra-env))
-         (process-environment (progn (setenv "PATH" path)
-                                     ;; Default LANG may screw up automake
-                                     ;; version detection in autogen.sh.
-                                     (setenv "LANG" "")
-                                     process-environment))
-         (exec-path exec-path))
-    (when dir
-      (when (not (file-exists-p dir))
-        (mkdir dir t))
-      (cd dir))
-    (let ((process (start-file-process-shell-command "mwb"
-                                                     (mwb-get-buffer) command)))
-      (set-process-sentinel process (mwb-get-sentinel k)))))
+  (with-current-buffer (mwb-get-buffer)
+   (let* ((shell-file-name "bash")
+          ;; By using lexical binding we can use setenv and getenv
+          ;; on our local version of process-environment.
+          (process-environment (append process-environment extra-env))
+          (process-environment (progn (setenv "PATH" path)
+                                      ;; Default LANG may screw up automake
+                                      ;; version detection in autogen.sh.
+                                      (setenv "LANG" "")
+                                      process-environment))
+          (exec-path exec-path))
+     (when dir
+       (when (not (file-exists-p dir))
+         (mkdir dir t))
+       (cd dir))
+     (let ((process (start-file-process-shell-command "mwb"
+                                                      (current-buffer) command)))
+       (set-process-sentinel process (mwb-get-sentinel k))))))
 
 (defun mwb-get-buffer ()
   (let ((buffer (get-buffer-create "mwb")))
@@ -499,16 +500,17 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
     (mwb-get-bsdtar
      (lambda (bsdtar)
        (when (not (file-exists-p path))
-            (mkdir path t))
-       (let* ((default-directory path)
-              (process
-               (start-file-process-shell-command
-                "mwb" (mwb-get-buffer)
-                (concat "\"" bsdtar "\" -xf " file))))
-         (set-process-sentinel
-          process
-          (mwb-get-sentinel
-           (lambda () (funcall k)))))))))
+         (mkdir path t))
+       (with-current-buffer (mwb-get-buffer)
+         (let* ((default-directory path)
+                (process
+                 (start-file-process-shell-command
+                  "mwb" (current-buffer)
+                  (concat "\"" bsdtar "\" -xf " file))))
+           (set-process-sentinel
+            process
+            (mwb-get-sentinel
+             (lambda () (funcall k))))))))))
 
 (defvar mwb-bsdtar-archives-to-recurse '("tar" "lzma"))
 
@@ -572,24 +574,25 @@ If PATHS is not specified start with mwb-libarchive-paths."
 ;; * Wget
 (defun mwb-wget-download-file (file k)
   "Download FILE using wget and then call continuation K."
-  (let* ((local-file (concat (file-name-as-directory mwb-wget-download-directory)
-                             (car (reverse (split-string file "/")))))
-         (default-directory mwb-wget-download-directory)
-         (wget (mwb-wget-get))
-         (check-certificate (if (mwb-wget-check-certificate)
-                                "--no-check-certificate" ""))
-         (k (lambda () (funcall k local-file))))
-    (if (not (file-exists-p local-file))
-        (progn
-          (when (not (file-exists-p mwb-wget-download-directory))
-            (mkdir mwb-wget-download-directory t))
-          (let ((process
-                 (start-file-process-shell-command
-                  "mwb" (mwb-get-buffer)
-                  (concat "\"" wget
-                          "\" " check-certificate " " file))))
-            (set-process-sentinel process (mwb-get-sentinel k))))
-      (funcall k))))
+  (with-current-buffer (mwb-get-buffer)
+   (let* ((local-file (concat (file-name-as-directory mwb-wget-download-directory)
+                              (car (reverse (split-string file "/")))))
+          (default-directory mwb-wget-download-directory)
+          (wget (mwb-wget-get))
+          (check-certificate (if (mwb-wget-check-certificate)
+                                 "--no-check-certificate" ""))
+          (k (lambda () (funcall k local-file))))
+     (if (not (file-exists-p local-file))
+         (progn
+           (when (not (file-exists-p mwb-wget-download-directory))
+             (mkdir mwb-wget-download-directory t))
+           (let ((process
+                  (start-file-process-shell-command
+                   "mwb" (current-buffer)
+                   (concat "\"" wget
+                           "\" " check-certificate " " file))))
+             (set-process-sentinel process (mwb-get-sentinel k))))
+       (funcall k)))))
 
 (defun mwb-wget-get ()
   "Ensure we have wget on our path for downloading dependencies.
