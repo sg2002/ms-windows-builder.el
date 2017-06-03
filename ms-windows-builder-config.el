@@ -146,7 +146,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
 
 (defvar mwb-mingw-packages
   '(("https://sourceforge.net/projects/mingw/files/MinGW/Base/"
-     ("binutils/binutils-2.25.1/binutils-2.25.1-1-mingw32-bin.tar.xz"
+     ("binutils/binutils-2.28/binutils-2.28-1-mingw32-bin.tar.xz"
       "mingwrt/mingwrt-5.0/mingwrt-5.0-mingw32-dll.tar.xz"
       "mingwrt/mingwrt-5.0/mingwrt-5.0-mingw32-dev.tar.xz "
       "w32api/w32api-5.0/w32api-5.0-mingw32-dev.tar.xz"
@@ -157,11 +157,13 @@ Currently it only allows to limit use of specific arguments by toolchains."
       ;; "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dll.tar.xz"
       ;; "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dev.tar.xz"
       ;; "w32api/w32api-3.17/w32api-3.17-2-mingw32-dev.tar.lzma"
-      "mpc/mpc-1.0.2/libmpc-1.0.2-mingw32-dll-3.tar.xz"
-      "mpfr/mpfr-3.1.2-2/mpfr-3.1.2-2-mingw32-dll.tar.lzma"
-      "gmp/gmp-5.1.2/gmp-5.1.2-1-mingw32-dll.tar.lzma"
+      "mpc/mpc-1.0.3/libmpc-1.0.3-1-mingw32-dll-3.tar.xz"
+      "mpfr/mpfr-3.1.5/libmpfr-3.1.5-1-mingw32-dll-4.tar.xz"
+      "gmp/gmp-6.1.2/libgmp-6.1.2-1-mingw32-dll-10.tar.xz"
+      "isl/isl-0.18/libisl-0.18-1-mingw32-dll-15.tar.xz"
       "gettext/gettext-0.18.3.2-2/gettext-0.18.3.2-2-mingw32-dev.tar.xz"
-      "gcc/Version5/gcc-5.3.0-3/gcc-core-5.3.0-3-mingw32-bin.tar.xz"
+      "gcc/Version6/gcc-6.3.0/libgcc-6.3.0-1-mingw32-dll-1.tar.xz"
+      "gcc/Version6/gcc-6.3.0/gcc-core-6.3.0-1-mingw32-bin.tar.xz"
       ;; Newer libiconv is available, but we still use this one, because that's
       ;; what ezwinports libxml is linked against.
       "libiconv/libiconv-1.13.1-1/libiconv-1.13.1-1-mingw32-dev.tar.lzma"))
