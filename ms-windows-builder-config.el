@@ -147,9 +147,9 @@ Currently it only allows to limit use of specific arguments by toolchains."
 (defvar mwb-mingw-packages
   '(("https://sourceforge.net/projects/mingw/files/MinGW/Base/"
      ("binutils/binutils-2.28/binutils-2.28-1-mingw32-bin.tar.xz"
-      "mingwrt/mingwrt-5.0/mingwrt-5.0-mingw32-dll.tar.xz"
-      "mingwrt/mingwrt-5.0/mingwrt-5.0-mingw32-dev.tar.xz "
-      "w32api/w32api-5.0/w32api-5.0-mingw32-dev.tar.xz"
+      "mingwrt/mingwrt-5.0.1/mingwrt-5.0.1-mingw32-dll.tar.xz"
+      "mingwrt/mingwrt-5.0.1/mingwrt-5.0.1-mingw32-dev.tar.xz"
+      "w32api/w32api-5.0.1/w32api-5.0.1-mingw32-dev.tar.xz"
       ;; Building with libxml and glib(both required for svg image support)
       ;; would fail with newer mingwrt and w32api.
       ;; This was fixed in 34b6df1, but if you're building up to and including 25.1
