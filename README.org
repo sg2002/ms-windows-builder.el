@@ -2,7 +2,9 @@
 This script installs the required tools and then builds Emacs from the
 source code.
 ** Requirements
-The only requirement is wget.  You can [[http://gnuwin32.sourceforge.net/packages/wget.htm][get it from GnuWin project]].  Or [[https://sourceforge.net/projects/ezwinports/files/wget-1.16.1-w32-bin.zip/download][from ezwinports]].
+You need to have git installed.
+
+The second requirement is wget.  You can [[http://gnuwin32.sourceforge.net/packages/wget.htm][get it from GnuWin project]].  Or [[https://sourceforge.net/projects/ezwinports/files/wget-1.16.1-w32-bin.zip/download][from ezwinports]].
 Then either put it on PATH or put the path to it into mwb-wget-paths.
 
 Path for GnuWin version is already set up.

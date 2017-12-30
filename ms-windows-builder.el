@@ -232,6 +232,10 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
           (compilation-mode)))
     buffer))
 
+;; * Emacs-specific
+(defun mwb-get-git-paths ()
+    "Autogen.sh now fails when git is not present."
+    "/c/Program Files/Git/cmd/:/c/Program Files (x86)/Git/cmd/")
 ;; * MinGW
 (defun mwb-mingw-get-exec-path ()
     (list (concat (file-name-as-directory mwb-mingw-directory) "msys/1.0/bin/")))
@@ -246,7 +250,8 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
           (mwb-mingw-convert-path
            (concat (file-name-as-directory mwb-mingw-directory) "mingw32/bin/")) ":"
            (mwb-mingw-convert-path
-            (concat (file-name-as-directory mwb-mingw-directory) "bin/"))))
+            (concat (file-name-as-directory mwb-mingw-directory) "bin/")) ":"
+            (mwb-get-git-paths)))
 
 (defun mwb-mingw-get-extra-env ()
   '())
@@ -358,7 +363,8 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
   (concat "/usr/local/bin:/usr/bin:"
           "/bin:/c/Windows/System32:/c/Windows:"
           "/c/Windows/System32/Mwbem:/c/Windows/System32/WindowsPowerShell/v1.0/:"
-          "/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/"))
+          "/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/:"
+          (mwb-get-git-paths)))
 
 (defun mwb-msys2-get-exec-path ()
   (list (concat (mwb-msys2-get-current-directory)  "usr/bin/")))
@@ -556,8 +562,10 @@ If PATHS is not specified start with mwb-libarchive-paths."
 (defun mwb-get-unzip (k)
   "Ensure we have unzip on our path for unarchiving and then call continuation K."
   (let ((unzip (mwb-locate-unzip)))
-    (if unzip unzip
-        (mwb-wget-download-file mwb-unzip-dist k))))
+    (if unzip (funcall k unzip)
+      (mwb-wget-download-file mwb-unzip-dist
+                              (lambda ()
+                                (funcall k unzip))))))
 
 (defun mwb-locate-unzip ()
   "Locate unzip execautable."
