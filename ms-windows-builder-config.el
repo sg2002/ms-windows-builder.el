@@ -283,6 +283,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
     "gmp-.*\\.dll" "gnutls-[0-9].\\.dll" "hogweed-.*\\.dll"
     "iconv-.*\\.dll" "idn.*\\.dll" "intl-.*\\.dll"
     "nettle-.*\\.dll" "p11-kit-.\\.dll" "tasn1-.*\\.dll"
+    "libunistring-.*\\.dll"
     ;; Images
     "gif-.*\\.dll" ; gif images
     "\\(cyg\\|lib\\)jpeg-.*\\.dll" ; jpeg images
