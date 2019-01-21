@@ -172,7 +172,7 @@ passed as the last argument into a prior form."
 into DESTINATION-DIR."
   (dolist (library libraries)
     (dolist (library-file (directory-files libraries-dir t library))
-      (copy-file library-file (concat (file-name-as-directory destination-dir) "bin") t)))
+      (copy-file library-file (concat (file-name-as-directory destination-dir) "bin/") t)))
   (when k (funcall k)))
 
 (defun mwb-replace-destination (toolchain destination-dir temp-destination-dir &optional k)
