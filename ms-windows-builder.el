@@ -24,11 +24,12 @@
 (require 'ms-windows-builder-config)
 
 ;; * Main
-(defun mwb-build (selected-toolchain output-directory &optional configuration)
-  "Build Emacs using SELECTED-TOOLCHAIN, which should be defined in mwb-builds.
-Install Emacs into OUTPUT-DIRECTORY  If CONFIGURATION is specified use it,
-otherwise use mwb-default-configuration.  CONFIGURATION should be defined
-in mwb-configurations."
+(defun mwb-build (selected-toolchain output-directory &optional configuration source)
+  "Build Emacs and put it into the OUTPUT-DIRECTORY.
+SELECTED-TOOLCHAIN should be one of the toolchains defined in mwb-toolchains.
+If CONFIGURATION is specified use it, otherwise use mwb-default-configuration.
+It should  be one of the configurations defined in mwb-configurations.
+If SOURCE is not specified mwb-emacs-source would be used instead."
   (let ((configuration-directory (concat (file-name-as-directory mwb-configurations-directory)
                            (file-name-nondirectory (directory-file-name output-directory))))
         (fininshed-fn (mwb-start))
@@ -38,7 +39,8 @@ in mwb-configurations."
           selected-toolchain
           (cadr (assoc (if configuration configuration
                          mwb-default-configuration)
-                       mwb-configurations)))))
+                       mwb-configurations))))
+	(source (if source source mwb-emacs-source)))
     (funcall (cadr (assoc 'ensure-fn toolchain))
              (lambda ()
                (mwb-build-full
@@ -46,7 +48,7 @@ in mwb-configurations."
                 (funcall (cadr (assoc 'get-exec-path-fn toolchain)))
                 (funcall (cadr (assoc 'get-path-fn toolchain)))
                 (funcall (cadr (assoc 'get-extra-env-fn toolchain)))
-                selected-configuration configuration-directory output-directory
+                source selected-configuration configuration-directory output-directory
                 (funcall (cadr (assoc 'get-libraries-dir-fn toolchain)))
                 (funcall (cadr (assoc 'get-libraries-fn toolchain)))
                 fininshed-fn)))))
@@ -103,20 +105,20 @@ mwb-confugration-args for them."
 
 ;; * Generic builder
 
-(defun mwb-build-full (toolchain exec-path path extra-env configuration
+(defun mwb-build-full (toolchain exec-path path extra-env source configuration
                                  configuration-dir destination-dir libraries-dir
                                  libraries
                                  &optional finished-fn)
-  "Build Emacs in CONFIGURATION-DIR from sources in mwb-emacs-source and install
-it into DESTINATION-DIR.  EXEC-PATH, PATH and EXTRA-ENV would eventually get passed
-to mwb-command and used there."
+  "Build Emacs from SOURCE and install it into DESTINATION-DIR.
+Use the TOOLCHAIN and configure in the CONFIGURATION-DIR.
+EXEC-PATH, PATH and EXTRA-ENV would eventually get passed to mwb-command and used there."
   (let ((temp-destination-dir
          (if (not (mwb-is-cygwin toolchain))
              (make-temp-name destination-dir)
            destination-dir)))
     (mwb-thread-cps
-     (mwb-autogen exec-path path extra-env)
-     (mwb-configure toolchain exec-path path extra-env configuration configuration-dir temp-destination-dir)
+     (mwb-autogen exec-path path extra-env source)
+     (mwb-configure toolchain exec-path path extra-env source configuration configuration-dir temp-destination-dir)
      (mwb-make exec-path path extra-env configuration-dir)
      (mwb-make-install exec-path path extra-env configuration configuration-dir)
      (mwb-copy-libraries libraries libraries-dir temp-destination-dir)
@@ -139,13 +141,13 @@ passed as the last argument into a prior form."
                                f))))
     (_ k)))
 
-(defun mwb-autogen (exec-path path extra-env k)
-  (mwb-command exec-path path extra-env "./autogen.sh" mwb-emacs-source k))
+(defun mwb-autogen (exec-path path extra-env source k)
+  (mwb-command exec-path path extra-env "./autogen.sh" source k))
 
-(defun mwb-configure (toolchain exec-path path extra-env configuration configuration-dir prefix k)
+(defun mwb-configure (toolchain exec-path path extra-env source configuration configuration-dir prefix k)
   (let*((cygwin-paths (mwb-is-cygwin toolchain))
-        (source-path (if cygwin-paths (mwb-cygwin-convert-path mwb-emacs-source)
-                       (mwb-mingw-convert-path mwb-emacs-source)))
+        (source-path (if cygwin-paths (mwb-cygwin-convert-path source)
+                       (mwb-mingw-convert-path source)))
         (prefix-path (if cygwin-paths (mwb-cygwin-convert-path prefix)
                        (mwb-mingw-convert-path prefix))))
     (mwb-command exec-path path (append extra-env (cadr (assoc 'configure-env configuration)))

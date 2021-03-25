@@ -1,67 +1,85 @@
 * ms-windows-builder.el
-This script installs the required tools and then builds Emacs from the
-source code.
+This script automates the process of compiling GNU Emacs on the MS Windows platform.  Multiple toolchains(Msys2, MinGW, Cygwin) are supported.
+
 ** Requirements
-You need to have git installed.
+1. Git.  It should be present on your PATH.
+2. Wget.  You can [[http://gnuwin32.sourceforge.net/packages/wget.htm][get it from GnuWin project]].  Or [[https://sourceforge.net/projects/ezwinports/files/wget-1.16.1-w32-bin.zip/download][from ezwinports]].  Then either put it on PATH or set mwb-wget-paths.  The default path for the GnuWin version is already set up.
+** Side effects
+Anything downloaded by this script using wget gets stored inside mwb-wget-download-directory and reused if it's already there.
 
-The second requirement is wget.  You can [[http://gnuwin32.sourceforge.net/packages/wget.htm][get it from GnuWin project]].  Or [[https://sourceforge.net/projects/ezwinports/files/wget-1.16.1-w32-bin.zip/download][from ezwinports]].
-Then either put it on PATH or put the path to it into mwb-wget-paths.
+Bsdtar would get installed, unless it's already present on your PATH.  If it's not present unzip.exe would be downloaded and used to install it.
 
-Path for GnuWin version is already set up.
-
-Anything downloaded by this script using wget gets stored to
-mwb-wget-download-directory and reused if it's already there.
-
-Bsdtar would get installed, unless it's already present on your PATH.
+Any toolchain required would be installed and set up for building Emacs, unless already present.
 ** Usage
-Make sure that, depending on the build, mwb-mingw-directory, mwb-msys2-64-directory or mwb-msys2-32-directory is writable and mwb-emacs-source points to Emacs source repository.  Put the script on your load path and do:
 #+BEGIN_SRC emacs-lisp
 (require 'ms-windows-builder)
 #+end_src
 
-Then use the build function.
+Call the build function:
+(mwb-build selected-toolchain output-directory configuration source)
+Toolchain should be a symbol pointing to one of the toolchains defined in mwb-toolchains.
+Output directory is the directory is where Emacs would get installed into.
+Configuration is optional and should be a symbol pointing to one of the configurations preset in mwb-configurations.  By default mwb-default-configuration(release) would be used.
+Source should be pointing to a folder containing emacs sources.  Or you can set mwb-emacs-source instead.
 
-For MinGW:
+Example usage:
 #+BEGIN_SRC emacs-lisp
-(mwb-build 'mingw "c:/Emacs/25-dev-mingw")
+  ;; Call only one of those at a time, not all!
+  (mwb-build 'mingw "c:/Emacs/bin/main-release-mingw" 'release "c:/Emacs/source/repo")
+  (mwb-build 'msys2-x32 "c:/Emacs/bin/main-release-msys2-x32"  'release "c:/Emacs/source/repo")
+  (mwb-build 'msys2-x64 "c:/Emacs/bin/main-release-msys2-x64" 'release "c:/Emacs/source/repo")
+  (mwb-build 'cygwin-x32 "c:/Emacs/bin/main-release-cygwin-x32" 'release "c:/Emacs/source/repo")
+  (mwb-build 'cygwin-x64 "c:/Emacs/bin/main-release-cygwin-x64" 'release "c:/Emacs/source/repo")
+  ;; Configuration and source are actually optional.
+  (mwb-build 'msys2-x64 "c:/Emacs/bin/main-release-msys2-x64")
 #+end_src
 
-For Msys2-x32:
-#+BEGIN_SRC emacs-lisp
-(mwb-build 'msys2-x32 "c:/Emacs/25-dev-msys2-x32")
-#+end_src
+This script outputs everything into the "mwb" buffer.  You can stop the build process at any time by calling mwb-stop.
 
-For Msys2-x64:
-#+BEGIN_SRC emacs-lisp
-(mwb-build 'msys2-x64 "c:/Emacs/25-dev-msys2-x64")
-#+end_src
-
-For Cygwin-x32:
-#+BEGIN_SRC emacs-lisp
-(mwb-build 'cygwin-x32 "c:/Emacs/25-dev-cygwin-x32")
-#+end_src
-
-For Cygwin-x64:
-#+BEGIN_SRC emacs-lisp
-(mwb-build 'cygwin-x64 "c:/Emacs/25-dev-cygwin-x64")
-#+end_src
-
-You can also specify a specific build configuration:
-#+BEGIN_SRC emacs-lisp
-(mwb-build 'msys2-x64 "c:/Emacs/25-dev-msys2-x64" 'release)
-#+end_src
-Configurations are defined in mwb-configurations. If no configuration is specified, mwb-default-configuration is used.
-
-Full build starting from the toolchain setup would take at least 30 minutes.
+Depending on your hardware and whether you are installing the toolchain, the whole process is estimated to take between 10 and 30 minutes.
 *** Msys2 specific
-During msys2 setup you would get a shell window.  You can close it after it's done with setup and you see the command prompt.
+During msys2 setup you would get a shell window.  You can close it after it's done with the setup and you see the command prompt.
+*** Launching Cygwin Emacs without a terminal window akin to runemacs.exe in other toolchains
+Cygwin provides a run.exe utility you can use to start Emacs:
+#+BEGIN_SRC eshell
+c:\Emacs\cygwin64\bin\run.exe emacs-27.1.exe
+#+end_src
 ** Known issues
 If you have MinGW already installed and try to use the same location, but it does not have all of the required components, the build would break.  You can manually install components into an existing directory using (mwb-mingw-install-packages).  This script assumes that your Msys is installed within the MinGW tree.  Otherwise, installing a different MinGW using this script is highly recommended.
 
-For Msys it should install all packages, you can also do it manually using (mwb-msys2-install-packages).
-
-For Cygwin the build would break if you have it already installed and try to use the same location, but it does not have all of the required components.  You can manually install packages into the existing cygwin installation by evaluating (mwb-cygwin-install 'x32) for x32 and (mwb-cygwin-install 'x64) for x64.  Cygwin is built --with-w32 and there is not svg image support.
+For Cygwin the build would break if you have it already installed and try to use the same location, but it does not have all of the required components.  You can manually install packages into the existing cygwin installation by evaluating (mwb-cygwin-install 'x32) for x32 and (mwb-cygwin-install 'x64) for x64.  Cygwin builds are done --with-w32 and there is no svg image support.
 ** Troubleshooting
-All output gets saved to "mwb" buffer.
+Make sure that mwb-wget-download-directory, mwb-configurations-directory, the toolchain directory you want to use(mwb-mingw-directory, mwb-msys2-64-directory, mwb-msys2-32-directory) and the root of your output-directory are all writable. For the output directory we want the root, since we're actually compiling into a temporary directory first and then renaming it.
+
+For Msys2 it should install all of the required packages, you can also force the package installation manually using (mwb-msys2-install-packages).
 
 If the script is unable to download one of the dependenices, open its path in browser and see if there's a newer version. Then replace it in the config file.
+** Compatibility
+This script was tested for each toolchain building the following Emacs versions.  The latest versions are installed for most of the toolchain components, so you can expect this info to be wrong due to possible future versions breaking the builds.  Only the MinGW toolchain is strictly tied to the particular component versions, so the compatibility for it should not change.
+*** Msys2
+- [X] 27.1
+- [ ] 26.3
+- [ ] 26.2
+- [ ] 26.1
+- [ ] 25.3
+- [ ] 25.2
+- [ ] 25.1
+- [ ] 24.5
+*** MingGW
+- [X] 27.1
+- [X] 26.3
+- [X] 26.2
+- [X] 26.1
+- [X] 25.3
+- [X] 25.2
+- [ ] 25.1(would work if you disable SVG support or patch it)
+- [ ] 24.5
+*** Cygwin
+- [X] 27.1
+- [X] 26.3
+- [X] 26.2
+- [X] 26.1
+- [X] 25.3
+- [X] 25.2
+- [X] 25.1
+- [ ] 24.5

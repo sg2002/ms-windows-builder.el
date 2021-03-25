@@ -244,7 +244,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
                                  "mingw-w64-x86_64-libjpeg-turbo" "mingw-w64-x86_64-librsvg"))
 
 (defvar mwb-msys2-x64-dist
-  "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20170918.tar.xz")
+  "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20210228.tar.xz")
 
 (defvar mwb-msys2-x32-packages '("base-devel" "mingw-w64-i686-toolchain"
                                  "mingw-w64-i686-libxml2" "mingw-w64-i686-gnutls"
@@ -253,7 +253,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
                                  "mingw-w64-i686-libjpeg-turbo" "mingw-w64-i686-librsvg"))
 
 (defvar mwb-msys2-x32-dist
-  "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20170918.tar.xz")
+  "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20200517.tar.xz")
 
 (defvar mwb-cygwin-x64-dist
   "https://cygwin.com/setup-x86_64.exe")
@@ -267,7 +267,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
 (defvar mwb-cygwin-packages
   '("automake" "autoconf" "make" "gcc-core" "libgnutls-devel"
     "libncurses-devel" "libgif-devel" "libjpeg-devel" "libpng-devel"
-    "libtiff-devel" "libX11-devel" "libXpm-noX-devel" "libxml2-devel"))
+    "libtiff-devel" "libX11-devel" "libXpm-noX-devel" "libxml2-devel" "libiconv-devel"))
 
 (defcustom mwb-dynamic-libraries
   '(;; libwinpthread is needed for msys2 only, it can be linked statically
@@ -310,7 +310,8 @@ Currently it only allows to limit use of specific arguments by toolchains."
     "cygxcb-.*\\.dll"
     "cygXau-.*\\.dll"
     "cygXdmcp-.*\\.dll"
-    "ffi-.*\\.dll")
+    "ffi-.*\\.dll"
+    "cygdeflate-.*\\.dll" "cygwebp-.*\\.dll" "cygzstd-.*\\.dll")
   "Dynamic libraries to copy into the installation dir during cygwin builds.")
 
 (defcustom mwb-msys2-dynamic-libraries
