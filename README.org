@@ -11,16 +11,21 @@ Bsdtar would get installed, unless it's already present on your PATH.  If it's n
 
 Any toolchain required would be installed and set up for building Emacs, unless already present.
 ** Usage
+Put the script onto your load-path, then require it:
 #+BEGIN_SRC emacs-lisp
 (require 'ms-windows-builder)
 #+end_src
-
-Call the build function:
+Then call the build function:
+#+BEGIN_SRC emacs-lisp
 (mwb-build selected-toolchain output-directory configuration source)
+#+end_src
 Toolchain should be a symbol pointing to one of the toolchains defined in mwb-toolchains.
-Output directory is the directory is where Emacs would get installed into.
+
+Output directory is the directory into which Emacs would get installed.
+
 Configuration is optional and should be a symbol pointing to one of the configurations preset in mwb-configurations.  By default mwb-default-configuration(release) would be used.
-Source should be pointing to a folder containing emacs sources.  Or you can set mwb-emacs-source instead.
+
+Source should be pointing to a folder containing GNU Emacs sources.  Or you can set mwb-emacs-source instead.
 
 Example usage:
 #+BEGIN_SRC emacs-lisp
@@ -44,19 +49,37 @@ Cygwin provides a run.exe utility you can use to start Emacs:
 #+BEGIN_SRC eshell
 c:\Emacs\cygwin64\bin\run.exe emacs-27.1.exe
 #+end_src
+** Emacs optional feature checklist
+To ensure that everything possible is working in your Emacs build, you should check for the presence of the following features.
+*** harfbuzz
+Calling (frame-parameter nil 'font-backend) should return harfbuzz first.
+*** gnutls
+Calling (gnutls-available-p) should return a non nil value.
+*** json
+Calling (json-serialize '((test . 1))) should return a non nil value.
+*** gif, jpeg, png, tiff, xpm and svg
+Make sure to try and open all 6 supported images formats.
 ** Known issues
-If you have MinGW already installed and try to use the same location, but it does not have all of the required components, the build would break.  You can manually install components into an existing directory using (mwb-mingw-install-packages).  This script assumes that your Msys is installed within the MinGW tree.  Otherwise, installing a different MinGW using this script is highly recommended.
+*** MinGW
+Harfbuzz currently does not work for MinGW.
 
-For Cygwin the build would break if you have it already installed and try to use the same location, but it does not have all of the required components.  You can manually install packages into the existing cygwin installation by evaluating (mwb-cygwin-install 'x32) for x32 and (mwb-cygwin-install 'x64) for x64.  Cygwin builds are done --with-w32 and there is no svg image support.
+If you have MinGW already installed and try to use the same location, but it does not have all of the required components, the build would break.  You can manually install components into an existing directory using (mwb-mingw-install-packages).  This script assumes that your Msys is installed within the MinGW tree.  Otherwise, installing a different MinGW using this script is highly recommended.
+*** Cygwin
+Cygwin builds are done --with-w32, harfbuzz does not work and there is no svg image support.
+
+The build would break if you have Cygwin already installed and try to use the same location, but it does not have all of the required components.  You can manually install packages into an existing Cygwin installation by evaluating (mwb-cygwin-install 'x32) for x32 and (mwb-cygwin-install 'x64) for x64.
 ** Troubleshooting
 Make sure that mwb-wget-download-directory, mwb-configurations-directory, the toolchain directory you want to use(mwb-mingw-directory, mwb-msys2-64-directory, mwb-msys2-32-directory) and the root of your output-directory are all writable. For the output directory we want the root, since we're actually compiling into a temporary directory first and then renaming it.
 
-For Msys2 it should install all of the required packages, you can also force the package installation manually using (mwb-msys2-install-packages).
-
 If the script is unable to download one of the dependenices, open its path in browser and see if there's a newer version. Then replace it in the config file.
+
+If some optional feature does not work, try opening the library dll with the [[https://www.dependencywalker.com/][Dependency Walker]] to see if it has some new dependency you're missing and try copying that dependency into your emacs/bin folder.  It's probably librsvg and it just won't stop until it starts depending on every single library ever written.
+
+For Msys2 it should install all of the required packages, you can also force the package installation manually using (mwb-msys2-install-packages).
 ** Compatibility
 This script was tested for each toolchain building the following Emacs versions.  The latest versions are installed for most of the toolchain components, so you can expect this info to be wrong due to possible future versions breaking the builds.  Only the MinGW toolchain is strictly tied to the particular component versions, so the compatibility for it should not change.
 *** Msys2
+- [X] 27.2
 - [X] 27.1
 - [ ] 26.3
 - [ ] 26.2
@@ -66,6 +89,7 @@ This script was tested for each toolchain building the following Emacs versions.
 - [ ] 25.1
 - [ ] 24.5
 *** MingGW
+- [X] 27.2
 - [X] 27.1
 - [X] 26.3
 - [X] 26.2
@@ -75,6 +99,7 @@ This script was tested for each toolchain building the following Emacs versions.
 - [ ] 25.1(would work if you disable SVG support or patch it)
 - [ ] 24.5
 *** Cygwin
+- [X] 27.2
 - [X] 27.1
 - [X] 26.3
 - [X] 26.2

@@ -171,6 +171,8 @@ Currently it only allows to limit use of specific arguments by toolchains."
      ("pkg-config-0.28-w32-bin.zip"
       "zlib-1.2.8-2-w32-bin.zip"
       "libxml2-2.7.8-w32-bin.zip"
+      "harfbuzz-2.4.0-w32-bin.zip"
+      "jansson-2.10-w32-bin.zip"
       ;; Gnutls
       "p11-kit-0.9-w32-bin.zip"
       "libidn-1.29-w32-bin.zip"
@@ -241,7 +243,8 @@ Currently it only allows to limit use of specific arguments by toolchains."
                                  "mingw-w64-x86_64-libxml2" "mingw-w64-x86_64-gnutls"
                                  "mingw-w64-x86_64-xpm-nox" "mingw-w64-x86_64-libtiff"
                                  "mingw-w64-x86_64-giflib" "mingw-w64-x86_64-libpng"
-                                 "mingw-w64-x86_64-libjpeg-turbo" "mingw-w64-x86_64-librsvg"))
+                                 "mingw-w64-x86_64-libjpeg-turbo" "mingw-w64-x86_64-librsvg"
+				 "mingw-w64-x86_64-harfbuzz" "mingw-w64-x86_64-jansson"))
 
 (defvar mwb-msys2-x64-dist
   "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20210228.tar.xz")
@@ -250,7 +253,8 @@ Currently it only allows to limit use of specific arguments by toolchains."
                                  "mingw-w64-i686-libxml2" "mingw-w64-i686-gnutls"
                                  "mingw-w64-i686-xpm-nox" "mingw-w64-i686-libtiff"
                                  "mingw-w64-i686-giflib" "mingw-w64-i686-libpng"
-                                 "mingw-w64-i686-libjpeg-turbo" "mingw-w64-i686-librsvg"))
+                                 "mingw-w64-i686-libjpeg-turbo" "mingw-w64-i686-librsvg"
+				 "mingw-w64-i686-harfbuzz" "mingw-w64-x86_64-jansson"))
 
 (defvar mwb-msys2-x32-dist
   "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20200517.tar.xz")
@@ -267,36 +271,46 @@ Currently it only allows to limit use of specific arguments by toolchains."
 (defvar mwb-cygwin-packages
   '("automake" "autoconf" "make" "gcc-core" "libgnutls-devel"
     "libncurses-devel" "libgif-devel" "libjpeg-devel" "libpng-devel"
-    "libtiff-devel" "libX11-devel" "libXpm-noX-devel" "libxml2-devel" "libiconv-devel"))
+    "libtiff-devel" "libX11-devel" "libXpm-noX-devel" "libxml2-devel" "libiconv-devel"
+    "libjansson-devel" "libharfbuzz-devel"))
 
 (defcustom mwb-dynamic-libraries
   '(;; libwinpthread is needed for msys2 only, it can be linked statically
     ;; by passing CFLAGS= -static to the configure script.
     "libwinpthread-.*\\.dll"
+    "gmp-.*\\.dll" ; Probably won't run without this, also needed for gnutls.
+    "zlib.*\\.dll" ; Used by emacs for compression, also by harfbuzz and libcroco.
+    "png.*\\.dll" ; Png images, also required by harfbuzz, libcroco and libgdk_pixbuf
+    ;; Harfbuzz
+    "\\(cyg\\|lib\\)bz2-.*\\.dll"  "\\(cyg\\|lib\\)freetype-.*\\.dll" "\\(cyg\\|lib\\)glib-.*\\.dll"
+    "\\(cyg\\|lib\\)graphite.*\\.dll" "\\(cyg\\|lib\\)harfbuzz-.\\.dll" "\\(cyg\\|lib\\)pcre-.*\\.dll"
+    "\\(cyg\\|lib\\)stdc\\+\\+-.*\\.dll" ; All of the above is also required for svg
+    "iconv-.*\\.dll" "intl-.*\\.dll" ; Also useb by gnutls
+    ;; Official binaries work without those two somehow.
+    "\\(cyg\\|lib\\)brotlidec.*\\.dll" "\\(cyg\\|lib\\)brotlicommon.*\\.dll"
+    ;; Harfbuzz end
     ;; "libdbus-.*\\.dll"
-    "zlib.*\\.dll" ; used by emacs for compression, also by libcroco
+    "\\(cyg\\|lib\\)jansson-.*\\.dll"
     "lzma-.*\\.dll" ;; required by libxml2 and libtiff
     ;; XML support library, required for HTML and XML support in Emacs
     ;; also required by rsvg
     "xml2-.*\\.dll"
     ;; Gnutls
-    "gmp-.*\\.dll" "gnutls-[0-9].\\.dll" "hogweed-.*\\.dll"
-    "iconv-.*\\.dll" "idn.*\\.dll" "intl-.*\\.dll"
+    "gnutls-[0-9].\\.dll" "hogweed-.*\\.dll" "idn.*\\.dll"
     "nettle-.*\\.dll" "p11-kit-.\\.dll" "tasn1-.*\\.dll"
     "libunistring-.*\\.dll"
-    ;; Images
     "gif-.*\\.dll" ; gif images
     "\\(cyg\\|lib\\)jpeg-.*\\.dll" ; jpeg images
-    "png.*\\.dll" ; png images, also required by libcroco and libgdk_pixbuf
-    "tiff-.*\\.dll" ; tiff images
+    "libdeflate\\.dll" "libwebp-.*\\.dll" "libzstd\\.dll" "tiff-.*\\.dll" ; tiff images
     "Xpm-noX.*\\.dll" ; xpm images
     ;; svg images
-    "libpcre-.*\\.dll" "libglib-.*\\.dll" "libgmodule-.*\\.dll" "libgobject-.*\\.dll"
-    "libgio-.*\\.dll" "libexpat-.*\\.dll" "libfontconfig-.*\\.dll""libbz2-.*\\.dll"
-    "libstdc\\+\\+-.*\\.dll" "libgraphite.*\\.dll" "libharfbuzz-.\\.dll" "libfreetype-.*\\.dll"
-    "libpixman-.*\\.dll" "libcairo-.\\.dll" "libcroco-.*\\.dll" "libgdk_pixbuf-.*\\.dll"
-    "libpango-.*\\.dll" "libpangoft.*\\.dll" "libpangowin32-.*\\.dll" "libpangocairo-.*\\.dll"
-    "librsvg-.*\\.dll")
+    "\\(cyg\\|lib\\)gmodule-.*\\.dll" "\\(cyg\\|lib\\)gio-.*\\.dll"
+    "\\(cyg\\|lib\\)gobject-.*\\.dll" ; Needed for cygwin harfbuzz too, but not for other toolchains.
+    "libcairo-.\\.dll" "libcairo-gobject-.*\\.dll" "libcroco-.*\\.dll"
+    "libdatrie-1.dll" "libexpat-.*\\.dll" "ffi-.*\\.dll" "libfontconfig-.*\\.dll" "libfribidi-.*\\.dll"
+    "libgdk_pixbuf-.*\\.dll"  "libpango-.*\\.dll" "libpangoft.*\\.dll"
+    "libpangowin32-.*\\.dll" "libpangocairo-.*\\.dll"
+    "libpixman-.*\\.dll" "librsvg-.*\\.dll" "libthai-.*\\.dll")
   "Dynamic libraries to copy into the installation dir.")
 
 (defcustom mwb-cygwin-dynamic-libraries
@@ -310,13 +324,11 @@ Currently it only allows to limit use of specific arguments by toolchains."
     "cygxcb-.*\\.dll"
     "cygXau-.*\\.dll"
     "cygXdmcp-.*\\.dll"
-    "ffi-.*\\.dll"
     "cygdeflate-.*\\.dll" "cygwebp-.*\\.dll" "cygzstd-.*\\.dll")
   "Dynamic libraries to copy into the installation dir during cygwin builds.")
 
 (defcustom mwb-msys2-dynamic-libraries
-  '("libgcc_s_.*\\.dll"
-    "ffi-.*\\.dll")
+  '("libgcc_s_.*\\.dll")
   "Dynamic libraries to copy into the installation dir during msys2 builds.")
 
 (defvar mwb-unzip-dist "http://stahlworks.com/dev/unzip.exe")
