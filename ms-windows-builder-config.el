@@ -158,12 +158,19 @@ Currently it only allows to limit use of specific arguments by toolchains."
       ;; "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dev.tar.xz"
       ;; "w32api/w32api-3.17/w32api-3.17-2-mingw32-dev.tar.lzma"
       "mpc/mpc-1.0.3/libmpc-1.0.3-1-mingw32-dll-3.tar.xz"
-      "mpfr/mpfr-3.1.5/libmpfr-3.1.5-1-mingw32-dll-4.tar.xz"
+      "mpfr/mpfr-3.1.5/libmpfr-3.1.5-2-mingw32-dll-4.tar.xz"
       "gmp/gmp-6.1.2/libgmp-6.1.2-2-mingw32-dll-10.tar.xz"
       "isl/isl-0.18/libisl-0.18-1-mingw32-dll-15.tar.xz"
       "gettext/gettext-0.18.3.2-2/gettext-0.18.3.2-2-mingw32-dev.tar.xz"
-      "gcc/Version6/gcc-6.3.0/libgcc-6.3.0-1-mingw32-dll-1.tar.xz"
-      "gcc/Version6/gcc-6.3.0/gcc-core-6.3.0-1-mingw32-bin.tar.xz"
+      ;; We're currently using gcc5, because this binary is broken:
+      ;; "gcc/Version6/gcc-6.3.0/gcc-core-6.3.0-1-mingw32-bin.tar.xz"
+      ;; I have an older copy of the same archive I downloaded earlier
+      ;; and it works. The current download does not.
+      ;; The only difference between them are cc1.exe and lto1.exe
+      ;; with cc1.exe being the culprit.
+      ;; "gcc/Version6/gcc-6.3.0/libgcc-6.3.0-1-mingw32-dll-1.tar.xz"
+      "gcc/Version5/gcc-5.3.0-3/gcc-core-5.3.0-3-mingw32-bin.tar.xz"
+      "gcc/Version5/gcc-5.3.0-3/libgcc-5.3.0-3-mingw32-dll-1.tar.xz"
       ;; Newer libiconv is available, but we still use this one, because that's
       ;; what ezwinports libxml is linked against.
       "libiconv/libiconv-1.13.1-1/libiconv-1.13.1-1-mingw32-dev.tar.lzma"))
@@ -237,7 +244,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
     ("https://sourceforge.net/projects/ezwinports/files/"
      ("automake-1.11.6-msys-bin.zip"
       "autoconf-2.65-msys-bin.zip"
-      "texinfo-6.5-w32-bin.zip"))))
+      "texinfo-6.7-w32-bin.zip"))))
 
 (defvar mwb-msys2-x64-packages '("base-devel" "mingw-w64-x86_64-toolchain"
                                  "mingw-w64-x86_64-libxml2" "mingw-w64-x86_64-gnutls"
