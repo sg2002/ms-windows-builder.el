@@ -96,7 +96,7 @@ This script was tested for each toolchain building the following Emacs versions.
 - [X] 26.1
 - [X] 25.3
 - [X] 25.2
-- [ ] 25.1(would work if you disable SVG support or patch it)
+- [X] 25.1(You need to enable the use of the older dependencies in the config file)
 - [ ] 24.5
 *** Cygwin
 - [X] 27.2

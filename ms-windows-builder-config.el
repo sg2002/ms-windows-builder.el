@@ -150,13 +150,6 @@ Currently it only allows to limit use of specific arguments by toolchains."
       "mingwrt/mingwrt-5.0.1/mingwrt-5.0.1-mingw32-dll.tar.xz"
       "mingwrt/mingwrt-5.0.1/mingwrt-5.0.1-mingw32-dev.tar.xz"
       "w32api/w32api-5.0.1/w32api-5.0.1-mingw32-dev.tar.xz"
-      ;; Building with libxml and glib(both required for svg image support)
-      ;; would fail with newer mingwrt and w32api.
-      ;; This was fixed in 34b6df1, but if you're building up to and including 25.1
-      ;; use these older versions:
-      ;; "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dll.tar.xz"
-      ;; "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dev.tar.xz"
-      ;; "w32api/w32api-3.17/w32api-3.17-2-mingw32-dev.tar.lzma"
       "mpc/mpc-1.0.3/libmpc-1.0.3-1-mingw32-dll-3.tar.xz"
       "mpfr/mpfr-3.1.5/libmpfr-3.1.5-2-mingw32-dll-4.tar.xz"
       "gmp/gmp-6.1.2/libgmp-6.1.2-2-mingw32-dll-10.tar.xz"
@@ -345,6 +338,53 @@ Currently it only allows to limit use of specific arguments by toolchains."
 (defvar mwb-libarchive-dist "https://sourceforge.net/projects/ezwinports/files/libarchive-3.3.1-w32-bin.zip")
 
 (defvar mwb-libarchive-paths '("c:/Program Files (x86)/" "c:/Program Files/" mwb-wget-download-directory))
+
+;; Uncomment and eval this if you're building Emacs 25.1 on MinGW
+;; (setq mwb-mingw-packages
+;;   '(("https://sourceforge.net/projects/mingw/files/MinGW/Base/"
+;;      ("binutils/binutils-2.28/binutils-2.28-1-mingw32-bin.tar.xz"
+;;       ;; Building with libxml and glib(both required for svg image support)
+;;       ;; would fail with newer mingwrt and w32api.
+;;       ;; This was fixed in 34b6df1, but if you're building up to and including 25.1
+;;       ;; use these older versions:
+;;       "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dll.tar.xz"
+;;       "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dev.tar.xz"
+;;       "w32api/w32api-3.17/w32api-3.17-2-mingw32-dev.tar.lzma"
+;;       "mpc/mpc-1.0.3/libmpc-1.0.3-1-mingw32-dll-3.tar.xz"
+;;       "mpfr/mpfr-3.1.5/libmpfr-3.1.5-2-mingw32-dll-4.tar.xz"
+;;       "gmp/gmp-6.1.2/libgmp-6.1.2-2-mingw32-dll-10.tar.xz"
+;;       "isl/isl-0.18/libisl-0.18-1-mingw32-dll-15.tar.xz"
+;;       "gettext/gettext-0.18.3.2-2/gettext-0.18.3.2-2-mingw32-dev.tar.xz"
+;;       "gcc/Version5/gcc-5.3.0-3/gcc-core-5.3.0-3-mingw32-bin.tar.xz"
+;;       "gcc/Version5/gcc-5.3.0-3/libgcc-5.3.0-3-mingw32-dll-1.tar.xz"
+;;       "libiconv/libiconv-1.13.1-1/libiconv-1.13.1-1-mingw32-dev.tar.lzma"))
+;;     ("https://sourceforge.net/projects/ezwinports/files/"
+;;      ("pkg-config-0.28-w32-bin.zip"
+;;       "zlib-1.2.8-2-w32-bin.zip"
+;;       "libxml2-2.7.8-w32-bin.zip"
+;;       "harfbuzz-2.4.0-w32-bin.zip"
+;;       "jansson-2.10-w32-bin.zip"
+;;       ;; Gnutls
+;;       "p11-kit-0.9-w32-bin.zip"
+;;       "libidn-1.29-w32-bin.zip"
+;;       "libtasn1-4.9-w32-bin.zip"
+;;       "nettle-3.3-w32-bin.zip"
+;;       "gnutls-3.4.15-w32-bin.zip"
+;;       ;; Images
+;;       "giflib-5.1.0-w32-bin.zip"
+;;       "jpeg-v9a-w32-bin.zip"
+;;       "libpng-1.6.12-w32-bin.zip"
+;;       "tiff-4.0.3-w32-bin.zip"
+;;       "libXpm-3.5.11-2-w32-bin.zip"
+;;       "pcre-8.21-w32-bin.zip"
+;;       "glib-2.38.2-w32-bin.zip"
+;;       "bzip2-1.0.6-w32-bin.zip"
+;;       "pixman-0.32.4-w32-bin.zip"
+;;       "cairo-1.12.16-w32-bin.zip"
+;;       "libcroco-0.6.8-w32-bin.zip"
+;;       "gdk-pixbuf-2.30.2-w32-bin.zip"
+;;       "pango-1.36.1-2-w32-bin.zip"
+;;       "librsvg-2.40.1-2-w32-bin.zip"))))
 
 (provide 'ms-windows-builder-config)
 ;;; ms-windows-builder-config.el ends here
