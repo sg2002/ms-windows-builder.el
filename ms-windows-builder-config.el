@@ -63,49 +63,16 @@
   :group 'mwb
   :type 'directory)
 
-(defvar mwb-toolchains
-  '((mingw ((ensure-fn mwb-mingw-ensure)
-            (get-exec-path-fn mwb-mingw-get-exec-path)
-            (get-path-fn mwb-mingw-get-path)
-            (get-extra-env-fn mwb-mingw-get-extra-env)
-            (get-libraries-dir-fn mwb-mingw-get-libraries-dir)
-            (get-libraries-fn mwb-mingw-get-libraries)))
-    (msys2-x64 ((ensure-fn mwb-msys2-x64-ensure)
-                (get-exec-path-fn mwb-msys2-get-exec-path)
-                (get-path-fn mwb-msys2-x64-get-path)
-                (get-extra-env-fn mwb-msys2-x64-get-extra-env)
-                (get-libraries-dir-fn mwb-msys2-x64-get-libraries-dir)
-                (get-libraries-fn mwb-msys2-get-libraries)))
-    (msys2-x32 ((ensure-fn mwb-msys2-x32-ensure)
-                (get-exec-path-fn mwb-msys2-get-exec-path)
-                (get-path-fn mwb-msys2-x32-get-path)
-                (get-extra-env-fn mwb-msys2-x32-get-extra-env)
-                (get-libraries-dir-fn mwb-msys2-x32-get-libraries-dir)
-                (get-libraries-fn mwb-msys2-get-libraries)))
-    (cygwin-x64 ((ensure-fn mwb-cygwin-x64-ensure)
-                 (get-exec-path-fn mwb-cygwin-x64-get-exec-path)
-                 (get-path-fn mwb-cygwin-get-path)
-                 (get-extra-env-fn mwb-mingw-get-extra-env)
-                 (get-libraries-dir-fn mwb-cygwin-x64-get-libraries-dir)
-                 (get-libraries-fn mwb-cygwin-get-libraries)))
-    (cygwin-x32 ((ensure-fn mwb-cygwin-x32-ensure)
-                 (get-exec-path-fn mwb-cygwin-x32-get-exec-path)
-                 (get-path-fn mwb-cygwin-get-path)
-                 (get-extra-env-fn mwb-mingw-get-extra-env)
-                 (get-libraries-dir-fn mwb-cygwin-x32-get-libraries-dir)
-                 (get-libraries-fn mwb-cygwin-get-libraries))))
-  "List of possbile builds for building Emacs.")
-
 (defcustom mwb-configurations
   '((debug
-     ((configure-env ("CFLAGS=-O0 -gdwarf-2 -g3"))
+     ((configure-env ("CFLAGS=-O0 -gdwarf-4 -g3"))
       (configure-args ("--without-imagemagick"
                        "--with-wide-int"
                        "--with-w32"
                        "--enable-checking='yes,glyphs'"
                        "--enable-check-lisp-object-type"))))
     (debug-with-modules
-     ((configure-env ("CFLAGS=-O0 -gdwarf-2 -g3"))
+     ((configure-env ("CFLAGS=-O0 -gdwarf-4 -g3"))
       (configure-args ("--without-imagemagick"
                        "--with-wide-int"
                        "--with-w32"
@@ -113,13 +80,13 @@
                        "--enable-check-lisp-object-type"
                        "--with-modules"))))
     (release
-     ((configure-env ("CFLAGS=-O2 -gdwarf-4 -g3"))
+     ((configure-env ("CFLAGS=-O2"))
       (configure-args ("--without-imagemagick"
                        "--with-wide-int"
                        "--with-w32"))
       (install-strip t)))
     (release-with-modules
-     ((configure-env ("CFLAGS=-O2 -gdwarf-4 -g3"))
+     ((configure-env ("CFLAGS=-O2"))
       (configure-args ("--without-imagemagick"
                        "--with-wide-int"
                        "--with-w32"
@@ -339,7 +306,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
 
 (defvar mwb-libarchive-paths '("c:/Program Files (x86)/" "c:/Program Files/" mwb-wget-download-directory))
 
-;; Uncomment and eval this if you're building Emacs 25.1 on MinGW
+;; Uncomment and eval this if you're building Emacs <= 25.1 on MinGW
 ;; (setq mwb-mingw-packages
 ;;   '(("https://sourceforge.net/projects/mingw/files/MinGW/Base/"
 ;;      ("binutils/binutils-2.28/binutils-2.28-1-mingw32-bin.tar.xz"
@@ -347,8 +314,12 @@ Currently it only allows to limit use of specific arguments by toolchains."
 ;;       ;; would fail with newer mingwrt and w32api.
 ;;       ;; This was fixed in 34b6df1, but if you're building up to and including 25.1
 ;;       ;; use these older versions:
-;;       "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dll.tar.xz"
-;;       "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dev.tar.xz"
+;;       ;; This version is the latest that would work for Emacs 24:
+;;       "mingwrt/mingwrt-3.21/mingwrt-3.21-mingw32-dll.tar.xz"
+;;       "mingwrt/mingwrt-3.21/mingwrt-3.21-mingw32-dev.tar.xz"
+;;       ;; This version is the latest that would work for Emacs 25.1:
+;;       ;; "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dll.tar.xz"
+;;       ;; "mingwrt/mingwrt-3.21.1/mingwrt-3.21.1-mingw32-dev.tar.xz"
 ;;       "w32api/w32api-3.17/w32api-3.17-2-mingw32-dev.tar.lzma"
 ;;       "mpc/mpc-1.0.3/libmpc-1.0.3-1-mingw32-dll-3.tar.xz"
 ;;       "mpfr/mpfr-3.1.5/libmpfr-3.1.5-2-mingw32-dll-4.tar.xz"

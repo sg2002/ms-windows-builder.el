@@ -58,7 +58,7 @@ Calling (gnutls-available-p) should return a non nil value.
 *** json
 Calling (json-serialize '((test . 1))) should return a non nil value.
 *** gif, jpeg, png, tiff, xpm and svg
-Make sure to try and open all 6 supported images formats.
+Make sure to try and open all 6 supported image formats.
 ** Known issues
 *** MinGW
 Harfbuzz currently does not work for MinGW.
@@ -96,8 +96,10 @@ This script was tested for each toolchain building the following Emacs versions.
 - [X] 26.1
 - [X] 25.3
 - [X] 25.2
-- [X] 25.1(You need to enable the use of the older dependencies in the config file)
-- [ ] 24.5
+- [X] 25.1(For this version and older you need to enable the use of the older dependencies in the config file.)
+- [X] 24.5(When building this and older remove --with-wide-int from the configuration you're using in mwb-configurations. You also should not use any configuration that combines optimization(-O > 0) and debug info(-gdwarfX, -gX), since this results in corrupted binaries.)
+- [X] 24.4
+- [ ] 24.3
 *** Cygwin
 - [X] 27.2
 - [X] 27.1

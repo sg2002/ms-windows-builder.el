@@ -23,6 +23,39 @@
 ;;; Code:
 (require 'ms-windows-builder-config)
 
+(defvar mwb-toolchains
+  '((mingw ((ensure-fn mwb-mingw-ensure)
+            (get-exec-path-fn mwb-mingw-get-exec-path)
+            (get-path-fn mwb-mingw-get-path)
+            (get-extra-env-fn mwb-mingw-get-extra-env)
+            (get-libraries-dir-fn mwb-mingw-get-libraries-dir)
+            (get-libraries-fn mwb-mingw-get-libraries)))
+    (msys2-x64 ((ensure-fn mwb-msys2-x64-ensure)
+                (get-exec-path-fn mwb-msys2-get-exec-path)
+                (get-path-fn mwb-msys2-x64-get-path)
+                (get-extra-env-fn mwb-msys2-x64-get-extra-env)
+                (get-libraries-dir-fn mwb-msys2-x64-get-libraries-dir)
+                (get-libraries-fn mwb-msys2-get-libraries)))
+    (msys2-x32 ((ensure-fn mwb-msys2-x32-ensure)
+                (get-exec-path-fn mwb-msys2-get-exec-path)
+                (get-path-fn mwb-msys2-x32-get-path)
+                (get-extra-env-fn mwb-msys2-x32-get-extra-env)
+                (get-libraries-dir-fn mwb-msys2-x32-get-libraries-dir)
+                (get-libraries-fn mwb-msys2-get-libraries)))
+    (cygwin-x64 ((ensure-fn mwb-cygwin-x64-ensure)
+                 (get-exec-path-fn mwb-cygwin-x64-get-exec-path)
+                 (get-path-fn mwb-cygwin-get-path)
+                 (get-extra-env-fn mwb-mingw-get-extra-env)
+                 (get-libraries-dir-fn mwb-cygwin-x64-get-libraries-dir)
+                 (get-libraries-fn mwb-cygwin-get-libraries)))
+    (cygwin-x32 ((ensure-fn mwb-cygwin-x32-ensure)
+                 (get-exec-path-fn mwb-cygwin-x32-get-exec-path)
+                 (get-path-fn mwb-cygwin-get-path)
+                 (get-extra-env-fn mwb-mingw-get-extra-env)
+                 (get-libraries-dir-fn mwb-cygwin-x32-get-libraries-dir)
+                 (get-libraries-fn mwb-cygwin-get-libraries))))
+  "List of possbile builds for building Emacs.")
+
 ;; * Main
 (defun mwb-build (selected-toolchain output-directory &optional configuration source)
   "Build Emacs and put it into the OUTPUT-DIRECTORY.
@@ -256,7 +289,8 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
             (mwb-get-git-paths)))
 
 (defun mwb-mingw-get-extra-env ()
-  '())
+  ;; Setting MSYSTEM is only needed for Emacs <= 24.5
+  '("MSYSTEM=MINGW32"))
 
 (defun mwb-mingw-get-libraries-dir ()
   (concat (file-name-as-directory mwb-mingw-directory) "bin/"))
