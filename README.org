@@ -52,16 +52,18 @@ c:\Emacs\cygwin64\bin\run.exe emacs-27.1.exe
 ** Emacs optional feature checklist
 To ensure that everything possible is working in your Emacs build, you should check for the presence of the following features.
 *** harfbuzz
-Calling (frame-parameter nil 'font-backend) should return harfbuzz first.
+Calling (frame-parameter nil 'font-backend) should return harfbuzz first.  Emacs is using harfbuzz since 27.1.
 *** gnutls
 Calling (gnutls-available-p) should return a non nil value.
 *** json
-Calling (json-serialize '((test . 1))) should return a non nil value.
+Calling (json-serialize '((test . 1))) should return a non nil value.  Json library support was added in 27.1.
+*** gmp
+GMP should be one of the values in system-configuraiton-features.  GMP is supported since 27.1.
 *** gif, jpeg, png, tiff, xpm and svg
 Make sure to try and open all 6 supported image formats.
 ** Known issues
 *** MinGW
-Harfbuzz currently does not work for MinGW.
+Harfbuzz and GMP currently does not work for MinGW.
 
 If you have MinGW already installed and try to use the same location, but it does not have all of the required components, the build would break.  You can manually install components into an existing directory using (mwb-mingw-install-packages).  This script assumes that your Msys is installed within the MinGW tree.  Otherwise, installing a different MinGW using this script is highly recommended.
 *** Cygwin

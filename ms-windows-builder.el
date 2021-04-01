@@ -318,6 +318,15 @@ is replaced with PATH.  If DIR is passed, the command is ran in that directory."
     (replace-string "c:/MinGW" (file-name-as-directory mwb-mingw-directory))
     (save-buffer)
     (kill-buffer))
+  ;; GCC versions that are available on osdn need include/features.h
+  ;; Mingw-get normally creates it dynamically using a lua script, but we're just
+  ;; doing a boring copy of the sample one.
+  (let ((features (concat (file-name-as-directory mwb-mingw-directory)
+			  "var/lib/wsl/include/features.h")))
+    (when (file-exists-p features)
+      (copy-file features
+		 (concat (file-name-as-directory mwb-mingw-directory)
+			 "include/"))))
   (when k
     (funcall k)))
 
