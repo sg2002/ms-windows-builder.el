@@ -125,6 +125,16 @@ mwb-confugration-args for them."
   (when (get-process "mwb")
     (delete-process "mwb")))
 
+(defvar mwb-finish-notification-functions '()
+  "Functions to call when the build operation is stopped.
+Functions in this list should take one argument MESSAGE that would contain
+the reason for the stoppage.  This hook is called on build error and successful
+ completion, but is not called when the build is stopped manually using `mwb-stop'.")
+
+(defun mwb-finish-notify(message)
+  (message message)
+  (run-hook-with-args 'mwb-finish-notification-functions message))
+
 (defun mwb-get-fininshed-fn ()
   (let ((start-time (current-time)))
     (lambda () (setq mwb-started nil)
@@ -134,7 +144,7 @@ mwb-confugration-args for them."
             (inhibit-read-only t))
         (with-current-buffer (mwb-get-buffer)
           (insert msg))
-        (message msg)))))
+        (mwb-finish-notify msg)))))
 
 ;; * Generic builder
 
@@ -233,8 +243,9 @@ Then call continuation K."
   (lambda (process event)
     (if (and (not (null mwb-started)) (equal event "finished\n"))
         (funcall k)
-      (progn
-        (message "mwb: Build operation failed. See mwb buffer for more details.")
+      (when mwb-started
+        (mwb-finish-notify
+	 "mwb: Build operation failed. See mwb buffer for more details.")
         (setq mwb-started nil)))))
 
 (defun mwb-command (exec-path path extra-env command &optional dir k)
@@ -505,16 +516,17 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
                        "\" -s \"" mwb-cygwin-site
                        "\" -R \"" (replace-regexp-in-string "/" "\\\\" dir)
                        "\" -P " (mapconcat 'identity mwb-cygwin-packages ",")))))
-         (set-process-sentinel process (mwb-get-cygwin-sentinel k)))))))
+         (set-process-sentinel process (mwb-get-cygwin-install-sentinel k)))))))
 
-(defun mwb-get-cygwin-sentinel(k)
+(defun mwb-get-cygwin-install-sentinel(k)
   (lambda (process event)
     (if (not (null mwb-started))
         (when k
           (funcall k))
       (progn
-        (message "mwb: Build operation failed. See mwb buffer for more details.")
-        (setq mwb-started nil)))))
+	(mwb-finish-notify
+	 "mwb: Build operation failed. See mwb buffer for more details.")
+	(setq mwb-started nil)))))
 
 (defun mwb-cygwin-get-libraries ()
   "Return list of libraries to copy into bin."

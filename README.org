@@ -42,6 +42,13 @@ Example usage:
 This script outputs everything into the "mwb" buffer.  You can stop the build process at any time by calling mwb-stop.
 
 Depending on your hardware and whether you are installing the toolchain, the whole process is estimated to take between 10 and 30 minutes.
+*** Notifications on operation completion
+You can use mwb-finish-notification-functions hook to pass build completion notifications.  For example, you can use [[https://github.com/vaskovsky/notify-send][notify-send for Windows]] to send messages into Windows 10 notification center:
+#+begin_src emacs-lisp
+  (defun mwb-notify-send (message)
+    (call-process-shell-command (format "notify-send MWB \"%s\"" message)))
+  (add-hook 'mwb-finish-notification-functions 'mwb-notify-send)
+#+end_src
 *** Msys2 specific
 During msys2 setup you would get a shell window.  You can close it after it's done with the setup and you see the command prompt.
 *** Launching Cygwin Emacs without a terminal window akin to runemacs.exe in other toolchains
