@@ -59,11 +59,16 @@ c:\Emacs\cygwin64\bin\run.exe emacs-27.1.exe
 ** Emacs optional feature checklist
 To ensure that everything possible is working in your Emacs build, you should check for the presence of the following features.
 *** harfbuzz
-Calling (frame-parameter nil 'font-backend) should return harfbuzz first.  Emacs is using harfbuzz since 27.1.
+Evaluating (frame-parameter nil 'font-backend) should return harfbuzz first.  Emacs is using harfbuzz since 27.1.
 *** gnutls
-Calling (gnutls-available-p) should return a non nil value.
+Evaluating (gnutls-available-p) should return a non-nil value.
+*** xml
+Since Emacs 27.1 you can eval (libxml-available-p) and it should return t.  For older versions the code bellow should return (xml nil):
+#+begin_src emacs-lisp
+(with-temp-buffer (insert "<xml></xml>") (libxml-parse-xml-region (point-min) (point-max)))
+#+end_src
 *** json
-Calling (json-serialize '((test . 1))) should return a non nil value.  Json library support was added in 27.1.
+Evaluating (json-serialize '((test . 1))) should return a non-nil value.  Json library support was added in 27.1.
 *** gmp
 GMP should be one of the values in system-configuraiton-features.  GMP is supported since 27.1.
 *** gif, jpeg, png, tiff, xpm and svg
