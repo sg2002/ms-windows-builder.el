@@ -516,17 +516,7 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
                        "\" -s \"" mwb-cygwin-site
                        "\" -R \"" (replace-regexp-in-string "/" "\\\\" dir)
                        "\" -P " (mapconcat 'identity mwb-cygwin-packages ",")))))
-         (set-process-sentinel process (mwb-get-cygwin-install-sentinel k)))))))
-
-(defun mwb-get-cygwin-install-sentinel(k)
-  (lambda (process event)
-    (if (not (null mwb-started))
-        (when k
-          (funcall k))
-      (progn
-	(mwb-finish-notify
-	 "mwb: Build operation failed. See mwb buffer for more details.")
-	(setq mwb-started nil)))))
+         (set-process-sentinel process (mwb-get-sentinel k)))))))
 
 (defun mwb-cygwin-get-libraries ()
   "Return list of libraries to copy into bin."
