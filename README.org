@@ -93,36 +93,60 @@ For Msys2 it should install all of the required packages, you can also force the
 ** Compatibility
 This script was tested for each toolchain building the following Emacs versions.  The latest versions are installed for most of the toolchain components, so you can expect this info to be wrong due to possible future versions breaking the builds.  Only the MinGW toolchain is strictly tied to the particular component versions, so the compatibility for it should not change.
 *** Msys2
-- [X] 27.2
-- [X] 27.1
-- [X] 26.3(For this and older you need to add "LDFLAGS=-Wl,-disable-dynamicbase -Wl,-disable-high-entropy-va -Wl,-default-image-base-low" into mwb-configurations configure-env for a 64 bit build and "LDFLAGS=-Wl,--disable-dynamicbase" for 32 bit.  This is due to msys2 enabling ASLR by default since binutils 2.36 and this breaks Emacs unexec.  Alternatively you can downgrade binutils to 2.35 or older.)
-- [X] 26.2
-- [X] 26.1
-- [X] 25.3
-- [X] 25.2
-- [X] 25.1
-- [ ] 24.5
-- [ ] 24.4
-- [ ] 24.3
+**** 27.2
+**** 27.1
+**** 26.3
+For this and older you need to add "LDFLAGS=-Wl,-disable-dynamicbase -Wl,-disable-high-entropy-va -Wl,-default-image-base-low" into mwb-configurations configure-env for a 64 bit build and "LDFLAGS=-Wl,--disable-dynamicbase" for 32 bit.  This is due to msys2 enabling ASLR by default since binutils 2.36 and this breaks Emacs unexec.  Alternatively you can downgrade binutils to 2.35 or older.
+**** 26.2
+**** 26.1
+**** 25.3
+**** 25.2
+**** 25.1
+**** 24.5
+**** 24.4
 *** MingGW
-- [X] 27.2
-- [X] 27.1
-- [X] 26.3
-- [X] 26.2
-- [X] 26.1
-- [X] 25.3
-- [X] 25.2
-- [X] 25.1(For this version and older you need to enable the use of the older dependencies in the config file.)
-- [X] 24.5(When building this and older remove --with-wide-int from the configuration you're using in mwb-configurations.  You also should not use any configuration that combines optimization(-O > 0) and debug info(-gdwarfX, -gX), since this results in corrupted binaries.)
-- [X] 24.4
-- [ ] 24.3
+**** 27.2
+**** 27.1
+**** 26.3
+**** 26.2
+**** 26.1
+**** 25.3
+**** 25.2
+**** 25.1
+For this version and older you need to enable the use of the older dependencies in the config file.
+**** 24.5
+When building this and older remove --with-wide-int from the configuration you're using in mwb-configurations.  You also should not use any configuration that combines optimization(-O > 0) and debug info(-gdwarfX, -gX), since this results in corrupted binaries.
+**** 24.4
 *** Cygwin
-- [X] 27.2
-- [X] 27.1
-- [X] 26.3
-- [X] 26.2
-- [X] 26.1
-- [X] 25.3
-- [X] 25.2
-- [X] 25.1
-- [ ] 24.5
+**** 27.2
+**** 27.1
+**** 26.3
+**** 26.2
+**** 26.1
+**** 25.3
+**** 25.2
+**** 25.1
+**** 24.5
+When building this and older you need to use an old Cygwin snapshot from [[http://www.crouchingtigerhiddenfruitbat.org/Cygwin/timemachine.html][Cygwin Time Machine]]:
+For 64 bit build:
+#+begin_src emacs-lisp
+  (setq mwb-cygwin-install-extra-args '("-X")
+        mwb-cygwin-site "http://ctm.crouchingtigerhiddenfruitbat.org/pub/cygwin/circa/64bit/2016/02/18/234032")
+#+end_src
+For 32 bit build:
+#+begin_src emacs-lisp
+  (setq mwb-cygwin-install-extra-args '("-X")
+        mwb-cygwin-site "http://ctm.crouchingtigerhiddenfruitbat.org/pub/cygwin/circa/2016/02/19/144014")
+#+end_src
+
+Cygwin snapshots newer than 2016-04-10 [[https://cygwin.com/pipermail/cygwin/2017-October/234695.html][are not compatible]] with the Glib version used by Emacs 24.  Snapshots newer than 2016-02-19 fail during Emacs bootstrap.
+
+On top of that you need to patch src/profiler.c around line 220 by adding:
+#+begin_src c
+  /* timer_getoverrun is not implemented on Cygwin, but the following
+     seems to be good enough for profiling. */
+  #ifdef CYGWIN
+  #define timer_getoverrun(x) 0
+  #endif
+#+end_src
+**** 24.4

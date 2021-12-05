@@ -45,13 +45,16 @@
     (cygwin-x64 ((ensure-fn mwb-cygwin-x64-ensure)
                  (get-exec-path-fn mwb-cygwin-x64-get-exec-path)
                  (get-path-fn mwb-cygwin-get-path)
-                 (get-extra-env-fn mwb-mingw-get-extra-env)
+		 ;; Setting MSYSTEM=MINGW32 or MINGW64 for Cygwin
+		 ;; would break compilation of Emacs 24, there it tries to do pwd -W
+		 ;; and -W flag only exists in MinGW.
+                 (get-extra-env-fn (lambda () '()))
                  (get-libraries-dir-fn mwb-cygwin-x64-get-libraries-dir)
                  (get-libraries-fn mwb-cygwin-get-libraries)))
     (cygwin-x32 ((ensure-fn mwb-cygwin-x32-ensure)
                  (get-exec-path-fn mwb-cygwin-x32-get-exec-path)
                  (get-path-fn mwb-cygwin-get-path)
-                 (get-extra-env-fn mwb-mingw-get-extra-env)
+                 (get-extra-env-fn (lambda () '()))
                  (get-libraries-dir-fn mwb-cygwin-x32-get-libraries-dir)
                  (get-libraries-fn mwb-cygwin-get-libraries))))
   "List of possbile builds for building Emacs.")
@@ -500,6 +503,9 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
   "Convert path PATH to MinGW format.  c:/Emacs would become /c/Emacs."
   (concat "/cygdrive/" (replace-regexp-in-string ":" "" path)))
 
+(defvar mwb-cygwin-install-extra-args ()
+  "Extra arguments to pass to Cygwin installer.")
+
 (defun mwb-cygwin-install (x &optional k)
   "Install cygwin. If X is 'x32, install 32 bit version."
   (let* ((k (if k k (mwb-start)))
@@ -512,7 +518,9 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
        (let ((process
               (start-file-process-shell-command
                "mwb" (mwb-get-buffer)
-               (concat installer " -q -n -B -l \"" mwb-wget-download-directory
+               (concat installer " "
+		       (combine-and-quote-strings mwb-cygwin-install-extra-args)
+		       " -q -n -B -l \"" mwb-wget-download-directory
                        "\" -s \"" mwb-cygwin-site
                        "\" -R \"" (replace-regexp-in-string "/" "\\\\" dir)
                        "\" -P " (mapconcat 'identity mwb-cygwin-packages ",")))))
