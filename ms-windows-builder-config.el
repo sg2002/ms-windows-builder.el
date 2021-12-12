@@ -321,7 +321,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
 				 "mingw-w64-x86_64-harfbuzz" "mingw-w64-x86_64-jansson"))
 
 (defvar mwb-msys2-x64-dist
-  "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20210228.tar.xz")
+  "https://sourceforge.net/projects/msys2/files/Base/msys2-x86_64-latest.tar.xz")
 
 (defvar mwb-msys2-x32-packages '("base-devel" "mingw-w64-i686-toolchain"
                                  "mingw-w64-i686-libxml2" "mingw-w64-i686-gnutls"
@@ -331,7 +331,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
 				 "mingw-w64-i686-harfbuzz" "mingw-w64-x86_64-jansson"))
 
 (defvar mwb-msys2-x32-dist
-  "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20200517.tar.xz")
+  "https://sourceforge.net/projects/msys2/files/Base/msys2-i686-latest.tar.xz")
 
 (defvar mwb-cygwin-x64-dist
   "https://cygwin.com/setup-x86_64.exe")

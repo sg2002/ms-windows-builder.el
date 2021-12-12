@@ -96,13 +96,20 @@ This script was tested for each toolchain building the following Emacs versions.
 **** 27.2
 **** 27.1
 **** 26.3
-For this and older you need to add "LDFLAGS=-Wl,-disable-dynamicbase -Wl,-disable-high-entropy-va -Wl,-default-image-base-low" into mwb-configurations configure-env for a 64 bit build and "LDFLAGS=-Wl,--disable-dynamicbase" for 32 bit.  This is due to msys2 enabling ASLR by default since binutils 2.36 and this breaks Emacs unexec.  Alternatively you can downgrade binutils to 2.35 or older.
+For this and older you need to add "LDFLAGS=-Wl,--disable-dynamicbase,--disable-high-entropy-va,--default-image-base-low" into mwb-configurations configure-env for a 64 bit build and "LDFLAGS=-Wl,--disable-dynamicbase" for 32 bit.  This is due to msys2 enabling ASLR by default since binutils 2.36 and this breaks Emacs unexec.  Alternatively you can downgrade binutils to 2.35 or older.
 **** 26.2
 **** 26.1
 **** 25.3
 **** 25.2
 **** 25.1
 **** 24.5
+Msys2 now reports a host system incompatible with the 24.5 sources.  Hence you need to patch configure.ac file, replacing "mingw32" with "mingw*" on lines 625 and 1264.
+
+Furthermore you need to add -D_FORTIFY_SOURCE=0 to CFLAGS for the appropriate configuration in mwb-configurations.
+
+If you are using a configuration with optimization enabled, make sure you set instal-strip to nil, because stripping breaks binaries for this version.
+
+For a 32 bit build make sure you remove --with-wide-int from your configuration.
 **** 24.4
 *** MingGW
 **** 27.2
@@ -127,7 +134,8 @@ When building this and older remove --with-wide-int from the configuration you'r
 **** 25.2
 **** 25.1
 **** 24.5
-When building this and older you need to use an old Cygwin snapshot from [[http://www.crouchingtigerhiddenfruitbat.org/Cygwin/timemachine.html][Cygwin Time Machine]]:
+When building this and older you need to use an old Cygwin snapshot from [[http://www.crouchingtigerhiddenfruitbat.org/Cygwin/timemachine.html][Cygwin Time Machine]].
+
 For 64 bit build:
 #+begin_src emacs-lisp
   (setq mwb-cygwin-install-extra-args '("-X")
