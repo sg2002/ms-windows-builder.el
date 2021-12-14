@@ -152,7 +152,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
     ("https://sourceforge.net/projects/ezwinports/files/"
      ("automake-1.11.6-msys-bin.zip"
       "autoconf-2.65-msys-bin.zip"
-      "texinfo-6.7-w32-bin.zip"))))
+      "texinfo-6.8-w32-bin.zip"))))
 
 (defvar mwb-mingw-packages
   '(("https://sourceforge.net/projects/mingw/files/MinGW/Base/"
