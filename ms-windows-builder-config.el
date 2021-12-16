@@ -152,34 +152,37 @@ Currently it only allows to limit use of specific arguments by toolchains."
     ("https://sourceforge.net/projects/ezwinports/files/"
      ("automake-1.11.6-msys-bin.zip"
       "autoconf-2.65-msys-bin.zip"
-      "texinfo-6.8-w32-bin.zip"))))
+      "texinfo-6.8-2-w32-bin.zip"))))
 
 (defvar mwb-mingw-packages
-  '(("https://sourceforge.net/projects/mingw/files/MinGW/Base/"
-     ("binutils/binutils-2.28/binutils-2.28-1-mingw32-bin.tar.xz"
-      "mingwrt/mingwrt-5.0.1/mingwrt-5.0.1-mingw32-dll.tar.xz"
-      "mingwrt/mingwrt-5.0.1/mingwrt-5.0.1-mingw32-dev.tar.xz"
-      "w32api/w32api-5.0.1/w32api-5.0.1-mingw32-dev.tar.xz"
-      "mpc/mpc-1.0.3/libmpc-1.0.3-1-mingw32-dll-3.tar.xz"
-      "mpfr/mpfr-3.1.5/libmpfr-3.1.5-2-mingw32-dll-4.tar.xz"
-      "gmp/gmp-6.1.2/libgmp-6.1.2-2-mingw32-dll-10.tar.xz"
+  '(("https://osdn.net/projects/mingw/downloads/"
+     ("70619/binutils-2.32-1-mingw32-bin.tar.xz"
+      "73378/mingwrt-5.4.1-mingw32-dll.tar.xz"
+      "73378/mingwrt-5.4.1-mingw32-dev.tar.xz"
+      "73379/w32api-5.4.1-mingw32-dev.tar.xz"
+      "72200/libmpc-1.1.0-1-mingw32-dll-3.tar.xz"
+      "72198/libmpfr-4.0.2-1-mingw32-dll-6.tar.xz"
+      "69295/libgmp-6.1.2-3-mingw32-dll-10.tar.xz"
       ;; gmp dev is only needed for Emacs > 27.1
       ;; And building with it breaks the builds.
-      ;; "gmp/gmp-6.1.2/gmp-6.1.2-2-mingw32-dev.tar.xz"
-      "isl/isl-0.18/libisl-0.18-1-mingw32-dll-15.tar.xz"
-      "gettext/gettext-0.18.3.2-2/gettext-0.18.3.2-2-mingw32-dev.tar.xz"
-      ;; We're currently using gcc5, because this binary is broken:
-      ;; "gcc/Version6/gcc-6.3.0/gcc-core-6.3.0-1-mingw32-bin.tar.xz"
-      ;; I have an older copy of the same archive I downloaded earlier
-      ;; and it works. The current download does not.
-      ;; The only difference between them are cc1.exe and lto1.exe
-      ;; with cc1.exe being the culprit.
-      ;; "gcc/Version6/gcc-6.3.0/libgcc-6.3.0-1-mingw32-dll-1.tar.xz"
-      "gcc/Version5/gcc-5.3.0-3/gcc-core-5.3.0-3-mingw32-bin.tar.xz"
-      "gcc/Version5/gcc-5.3.0-3/libgcc-5.3.0-3-mingw32-dll-1.tar.xz"
-      ;; Newer libiconv is available, but we still use this one, because that's
-      ;; what ezwinports libxml is linked against.
-      "libiconv/libiconv-1.13.1-1/libiconv-1.13.1-1-mingw32-dev.tar.lzma"))
+      ;; "69294/gmp-6.1.2-3-mingw32-dev.tar.xz"
+      "72494/libisl-0.21-2-mingw32-dll-21.tar.xz"
+      "69311/gettext-0.18.3.2-2-mingw32-dev.tar.xz"
+      ;; MinGW gcc 9.2.0-3 requires a recent enough version of libintl to run, but the
+      ;; libraries we download from ezwinports provide and require an older version.
+      ;; mingw-get-setup still installs gcc 9.2.0-2, which runs fine without libintl,
+      ;; so we gonna use that for now.
+      ;; "72217/gcc-core-9.2.0-3-mingw32-bin.tar.xz"
+      ;; "72215/libgcc-9.2.0-3-mingw32-dll-1.tar.xz"
+
+      ;; features.h, see mwb-mingw-post-extract
+      "70547/wsl-features-20190122-1-mingw32-cfg.tar.xz"
+      "69315/libiconv-1.14-4-mingw32-dev.tar.xz"))
+    ;; gcc 9.2.0.2 is not available from normal osdn mingw web site
+    ;; so we use the urls for mingw-get-setup.
+    ("https://osdn.net/dl/mingw/"
+     ("gcc-core-9.2.0-2-mingw32-bin.tar.xz"
+      "libgcc-9.2.0-2-mingw32-dll-1.tar.xz"))
     ("https://sourceforge.net/projects/ezwinports/files/"
      ("pkg-config-0.28-w32-bin.zip"
       "zlib-1.2.8-2-w32-bin.zip"
@@ -208,27 +211,34 @@ Currently it only allows to limit use of specific arguments by toolchains."
       "pango-1.36.1-2-w32-bin.zip"
       "librsvg-2.40.1-2-w32-bin.zip"))))
 
-;; The newest osdn MinGW.
-;; Gnutls and SVG is broken here.
-;; Would not even compile with GMP support.
+;; Last working sourceforge-only MinGW distribution.
+;; Use it for Emacs <= 26.1.
 ;; (setq mwb-mingw-packages
-;;   '(("https://osdn.net/projects/mingw/downloads/"
-;;      ("70619/binutils-2.32-1-mingw32-bin.tar.xz"
-;;       "73378/mingwrt-5.4.1-mingw32-dll.tar.xz"
-;;       "73378/mingwrt-5.4.1-mingw32-dev.tar.xz"
-;;       "73379/w32api-5.4.1-mingw32-dev.tar.xz"
-;;       "72200/libmpc-1.1.0-1-mingw32-dll-3.tar.xz"
-;;       "72198/libmpfr-4.0.2-1-mingw32-dll-6.tar.xz"
-;;       "69295/libgmp-6.1.2-3-mingw32-dll-10.tar.xz"
+;;   '(("https://sourceforge.net/projects/mingw/files/MinGW/Base/"
+;;      ("binutils/binutils-2.28/binutils-2.28-1-mingw32-bin.tar.xz"
+;;       "mingwrt/mingwrt-5.0.1/mingwrt-5.0.1-mingw32-dll.tar.xz"
+;;       "mingwrt/mingwrt-5.0.1/mingwrt-5.0.1-mingw32-dev.tar.xz"
+;;       "w32api/w32api-5.0.1/w32api-5.0.1-mingw32-dev.tar.xz"
+;;       "mpc/mpc-1.0.3/libmpc-1.0.3-1-mingw32-dll-3.tar.xz"
+;;       "mpfr/mpfr-3.1.5/libmpfr-3.1.5-2-mingw32-dll-4.tar.xz"
+;;       "gmp/gmp-6.1.2/libgmp-6.1.2-2-mingw32-dll-10.tar.xz"
 ;;       ;; gmp dev is only needed for Emacs > 27.1
-;;       ;; "69294/gmp-6.1.2-3-mingw32-dev.tar.xz"
-;;       "72494/libisl-0.21-2-mingw32-dll-21.tar.xz"
-;;       "69311/gettext-0.18.3.2-2-mingw32-dev.tar.xz"
-;;       "72217/gcc-core-9.2.0-3-mingw32-bin.tar.xz"
-;;       "72215/libgcc-9.2.0-3-mingw32-dll-1.tar.xz"
-;;       ;; features.h, see mwb-mingw-post-extract
-;;       "70547/wsl-features-20190122-1-mingw32-cfg.tar.xz"
-;;       "69315/libiconv-1.14-4-mingw32-dev.tar.xz"))
+;;       ;; And building with it breaks the builds.
+;;       ;; "gmp/gmp-6.1.2/gmp-6.1.2-2-mingw32-dev.tar.xz"
+;;       "isl/isl-0.18/libisl-0.18-1-mingw32-dll-15.tar.xz"
+;;       "gettext/gettext-0.18.3.2-2/gettext-0.18.3.2-2-mingw32-dev.tar.xz"
+;;       ;; We're currently using gcc5, because this binary is broken:
+;;       ;; "gcc/Version6/gcc-6.3.0/gcc-core-6.3.0-1-mingw32-bin.tar.xz"
+;;       ;; I have an older copy of the same archive I downloaded earlier
+;;       ;; and it works. The current download does not.
+;;       ;; The only difference between them are cc1.exe and lto1.exe
+;;       ;; with cc1.exe being the culprit.
+;;       ;; "gcc/Version6/gcc-6.3.0/libgcc-6.3.0-1-mingw32-dll-1.tar.xz"
+;;       "gcc/Version5/gcc-5.3.0-3/gcc-core-5.3.0-3-mingw32-bin.tar.xz"
+;;       "gcc/Version5/gcc-5.3.0-3/libgcc-5.3.0-3-mingw32-dll-1.tar.xz"
+;;       ;; Newer libiconv is available, but we still use this one, because that's
+;;       ;; what ezwinports libxml is linked against.
+;;       "libiconv/libiconv-1.13.1-1/libiconv-1.13.1-1-mingw32-dev.tar.lzma"))
 ;;     ("https://sourceforge.net/projects/ezwinports/files/"
 ;;      ("pkg-config-0.28-w32-bin.zip"
 ;;       "zlib-1.2.8-2-w32-bin.zip"
@@ -255,13 +265,9 @@ Currently it only allows to limit use of specific arguments by toolchains."
 ;;       "libcroco-0.6.8-w32-bin.zip"
 ;;       "gdk-pixbuf-2.30.2-w32-bin.zip"
 ;;       "pango-1.36.1-2-w32-bin.zip"
-;;       "librsvg-2.40.1-2-w32-bin.zip"))
-;;     ("https://osdn.net/projects/mingw/downloads/"
-;;      (;; New GCC needs a fresher libintl, than the one that's
-;;       ;; provided with some ezwinports packages, so we override it.
-;;       "69307/libintl-0.18.3.2-2-mingw32-dll-8.tar.xz"))))
+;;       "librsvg-2.40.1-2-w32-bin.zip"))))
 
-;; Uncomment and eval this if you're building Emacs <= 25.1 on MinGW
+;; Uncomment and eval this if you're building Emacs <= 25.1 on MinGW.
 ;; (setq mwb-mingw-packages
 ;;   '(("https://sourceforge.net/projects/mingw/files/MinGW/Base/"
 ;;      ("binutils/binutils-2.28/binutils-2.28-1-mingw32-bin.tar.xz"

@@ -117,6 +117,7 @@ For a 32 bit build make sure you remove --with-wide-int from your configuration.
 **** 26.3
 **** 26.2
 **** 26.1
+For this and older you need to enable the use of the older, sourceforge-only, MinGW distribution in the config file.
 **** 25.3
 **** 25.2
 **** 25.1
