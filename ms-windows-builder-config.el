@@ -168,21 +168,11 @@ Currently it only allows to limit use of specific arguments by toolchains."
       ;; "69294/gmp-6.1.2-3-mingw32-dev.tar.xz"
       "72494/libisl-0.21-2-mingw32-dll-21.tar.xz"
       "69311/gettext-0.18.3.2-2-mingw32-dev.tar.xz"
-      ;; MinGW gcc 9.2.0-3 requires a recent enough version of libintl to run, but the
-      ;; libraries we download from ezwinports provide and require an older version.
-      ;; mingw-get-setup still installs gcc 9.2.0-2, which runs fine without libintl,
-      ;; so we gonna use that for now.
-      ;; "72217/gcc-core-9.2.0-3-mingw32-bin.tar.xz"
-      ;; "72215/libgcc-9.2.0-3-mingw32-dll-1.tar.xz"
-
+      "72217/gcc-core-9.2.0-3-mingw32-bin.tar.xz"
+      "72215/libgcc-9.2.0-3-mingw32-dll-1.tar.xz"
       ;; features.h, see mwb-mingw-post-extract
       "70547/wsl-features-20190122-1-mingw32-cfg.tar.xz"
       "69315/libiconv-1.14-4-mingw32-dev.tar.xz"))
-    ;; gcc 9.2.0.2 is not available from normal osdn mingw web site
-    ;; so we use the urls for mingw-get-setup.
-    ("https://osdn.net/dl/mingw/"
-     ("gcc-core-9.2.0-2-mingw32-bin.tar.xz"
-      "libgcc-9.2.0-2-mingw32-dll-1.tar.xz"))
     ("https://sourceforge.net/projects/ezwinports/files/"
      ("pkg-config-0.28-w32-bin.zip"
       "zlib-1.2.8-2-w32-bin.zip"
@@ -209,7 +199,11 @@ Currently it only allows to limit use of specific arguments by toolchains."
       "libcroco-0.6.8-w32-bin.zip"
       "gdk-pixbuf-2.30.2-w32-bin.zip"
       "pango-1.36.1-2-w32-bin.zip"
-      "librsvg-2.40.1-2-w32-bin.zip"))))
+      "librsvg-2.40.1-2-w32-bin.zip"))
+    ("https://osdn.net/projects/mingw/downloads/"
+     (;; New GCC needs a fresher libintl, than the one that's
+      ;; provided with some ezwinports packages, so we override it.
+      "69307/libintl-0.18.3.2-2-mingw32-dll-8.tar.xz"))))
 
 ;; Last working sourceforge-only MinGW distribution.
 ;; Use it for Emacs <= 26.1.
@@ -358,6 +352,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
   '(;; libwinpthread is needed for msys2 only, it can be linked statically
     ;; by passing CFLAGS= -static to the configure script.
     "libwinpthread-.*\\.dll"
+    "libgcc_s_.*\\.dll" ; Required by iconv
     "gmp-.*\\.dll" ; Probably won't run without this, also needed for gnutls.
     "zlib.*\\.dll" ; Used by emacs for compression, also by harfbuzz and libcroco.
     "png.*\\.dll" ; Png images, also required by harfbuzz, libcroco and libgdk_pixbuf
@@ -365,7 +360,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
     "\\(cyg\\|lib\\)bz2-.*\\.dll"  "\\(cyg\\|lib\\)freetype-.*\\.dll" "\\(cyg\\|lib\\)glib-.*\\.dll"
     "\\(cyg\\|lib\\)graphite.*\\.dll" "\\(cyg\\|lib\\)harfbuzz-.\\.dll" "\\(cyg\\|lib\\)pcre-.*\\.dll"
     "\\(cyg\\|lib\\)stdc\\+\\+-.*\\.dll" ; All of the above is also required for svg
-    "iconv-.*\\.dll" "intl-.*\\.dll" ; Also useb by gnutls
+    "iconv-.*\\.dll" "intl-.*\\.dll" ; Also used by gnutls
     ;; Official binaries work without those two somehow.
     "\\(cyg\\|lib\\)brotlidec.*\\.dll" "\\(cyg\\|lib\\)brotlicommon.*\\.dll"
     ;; Harfbuzz end
@@ -408,7 +403,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
   "Dynamic libraries to copy into the installation dir during cygwin builds.")
 
 (defcustom mwb-msys2-dynamic-libraries
-  '("libgcc_s_.*\\.dll")
+  '()
   "Dynamic libraries to copy into the installation dir during msys2 builds.")
 
 (defvar mwb-unzip-dist "http://stahlworks.com/dev/unzip.exe")
