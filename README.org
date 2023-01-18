@@ -5,7 +5,7 @@ This script automates the process of compiling GNU Emacs on the MS Windows platf
 1. Git.  It should be present on your PATH.
 2. Wget.  You can [[http://gnuwin32.sourceforge.net/packages/wget.htm][get it from GnuWin project]].  Or [[https://sourceforge.net/projects/ezwinports/files/wget-1.16.1-w32-bin.zip/download][from ezwinports]].  Then either put it on PATH or set mwb-wget-paths.  The default path for the GnuWin version is already set up.
 ** Side effects
-Anything downloaded by this script using wget gets stored inside mwb-wget-download-directory and reused if it's already there.
+Anything downloaded by this script using wget gets stored inside ~mwb-wget-download-directory~ and reused if it's already there.
 
 Bsdtar would get installed, unless it's already present on your PATH.  If it's not present unzip.exe would be downloaded and used to install it.
 
@@ -19,13 +19,13 @@ Then call the build function:
 #+BEGIN_SRC emacs-lisp
 (mwb-build selected-toolchain output-directory configuration source)
 #+end_src
-Toolchain should be a symbol pointing to one of the toolchains defined in mwb-toolchains.
+Toolchain should be a symbol pointing to one of the toolchains defined in ~mwb-toolchains~.
 
 Output directory is the directory into which Emacs would get installed.
 
-Configuration is optional and should be a symbol pointing to one of the configurations preset in mwb-configurations.  By default mwb-default-configuration(release) would be used.
+Configuration is optional and should be a symbol pointing to one of the configurations preset in ~mwb-configurations~.  By default ~mwb-default-configuration~ is used.
 
-Source should be pointing to a folder containing GNU Emacs sources.  Or you can set mwb-emacs-source instead.
+Source should be pointing to a folder containing GNU Emacs sources.  Or you can set ~mwb-emacs-source~ instead.
 
 Example usage:
 #+BEGIN_SRC emacs-lisp
@@ -39,7 +39,7 @@ Example usage:
   (mwb-build 'msys2-x64 "c:/Emacs/bin/main-release-msys2-x64")
 #+end_src
 
-This script outputs everything into the "mwb" buffer.  You can stop the build process at any time by calling mwb-stop.
+This script outputs everything into the "mwb" buffer.  You can stop the build process at any time by calling ~mwb-stop~.
 
 Depending on your hardware and whether you are installing the toolchain, the whole process is estimated to take between 10 and 30 minutes.
 *** Notifications on operation completion
@@ -54,49 +54,51 @@ During msys2 setup you would get a shell window.  You can close it after it's do
 *** Launching Cygwin Emacs without a terminal window akin to runemacs.exe in other toolchains
 Cygwin provides a run.exe utility you can use to start Emacs:
 #+BEGIN_SRC eshell
-c:\Emacs\cygwin64\bin\run.exe emacs-27.1.exe
+c:\cygwin64\bin\run.exe emacs-27.1.exe
 #+end_src
 ** Emacs optional feature checklist
 To ensure that everything possible is working in your Emacs build, you should check for the presence of the following features.
 *** harfbuzz
-Evaluating (frame-parameter nil 'font-backend) should return harfbuzz first.  Emacs is using harfbuzz since 27.1.
+Evaluating ~(frame-parameter nil 'font-backend)~ should return harfbuzz first.  Emacs is using harfbuzz since 27.1.
 *** gnutls
-Evaluating (gnutls-available-p) should return a non-nil value.
+Evaluating ~(gnutls-available-p)~ should return a non-nil value.
 *** xml
-Since Emacs 27.1 you can eval (libxml-available-p) and it should return t.  For older versions the code bellow should return (xml nil):
+Since Emacs 27.1 you can eval ~(libxml-available-p)~ and it should return t.  For older versions the code bellow should return (xml nil):
 #+begin_src emacs-lisp
 (with-temp-buffer (insert "<xml></xml>") (libxml-parse-xml-region (point-min) (point-max)))
 #+end_src
 *** json
-Evaluating (json-serialize '((test . 1))) should return a non-nil value.  Json library support was added in 27.1.
+Evaluating ~(json-serialize '((test . 1)))~ should return a non-nil value.  Json library support was added in 27.1.
 *** gmp
-GMP should be one of the values in system-configuraiton-features.  GMP is supported since 27.1.
+GMP should be one of the values in ~system-configuraiton-features~.  GMP is supported since 27.1.
 *** gif, jpeg, png, tiff, xpm and svg
 Make sure to try and open all 6 supported image formats.
 ** Known issues
 *** MinGW
 Harfbuzz and GMP currently does not work for MinGW.
 
-If you have MinGW already installed and try to use the same location, but it does not have all of the required components, the build would break.  You can manually install components into an existing directory using (mwb-mingw-install-packages).  This script assumes that your Msys is installed within the MinGW tree.  Otherwise, installing a different MinGW using this script is highly recommended.
+If you have MinGW already installed and try to use the same location, but it does not have all of the required components, the build would break.  You can manually install components into an existing directory using ~(mwb-mingw-install-packages)~.  This script assumes that your Msys is installed within the MinGW tree.  Otherwise, installing a different MinGW using this script is highly recommended.
 *** Cygwin
-Cygwin builds are done --with-w32, harfbuzz does not work and there is no svg image support.
+Cygwin builds are done ~--with-w32~, harfbuzz does not work and there is no svg image support.
 
-The build would break if you have Cygwin already installed and try to use the same location, but it does not have all of the required components.  You can manually install packages into an existing Cygwin installation by evaluating (mwb-cygwin-install 'x32) for x32 and (mwb-cygwin-install 'x64) for x64.
+The build would break if you have Cygwin already installed and try to use the same location, but it does not have all of the required components.  You can manually install packages into an existing Cygwin installation by evaluating ~(mwb-cygwin-install 'x32)~ for x32 and ~(mwb-cygwin-install 'x64)~ for x64.
 ** Troubleshooting
-Make sure that mwb-wget-download-directory, mwb-configurations-directory, the toolchain directory you want to use(mwb-mingw-directory, mwb-msys2-64-directory, mwb-msys2-32-directory) and the root of your output-directory are all writable. For the output directory we want the root, since we're actually compiling into a temporary directory first and then renaming it.
+Make sure that ~mwb-wget-download-directory~, ~mwb-configurations-directory~, the toolchain directory you want to use(~mwb-mingw-directory~, ~mwb-msys2-64-directory~, ~mwb-msys2-32-directory~) and the root of your output-directory are all writable.  For the output directory we want the root, since we're actually compiling into a temporary directory first and then renaming it.
 
-If the script is unable to download one of the dependenices, open its path in browser and see if there's a newer version. Then replace it in the config file.
+If the script is unable to download one of the dependenices, open its path in browser and see if there's a newer version.  Then replace it in the config file.
 
-If some optional feature does not work, try opening the library dll with the [[https://www.dependencywalker.com/][Dependency Walker]] to see if it has some new dependency you're missing and try copying that dependency into your emacs/bin folder.  It's probably librsvg and it just won't stop until it starts depending on every single library ever written.
+If some optional feature does not work, try opening the library dll with the [[https://github.com/lucasg/Dependencies][Dependencies]] to see if it has some new dependency you're missing and try copying that dependency into your emacs/bin folder.  It's probably librsvg and it just won't stop until it starts depending on every single library ever written.
 
-For Msys2 it should install all of the required packages, you can also force the package installation manually using (mwb-msys2-install-packages).
+For Msys2 it should install all of the required packages, you can also force the package installation manually using ~(mwb-msys2-install-packages)~.
 ** Compatibility
 This script was tested for each toolchain building the following Emacs versions.  The latest versions are installed for most of the toolchain components, so you can expect this info to be wrong due to possible future versions breaking the builds.  Only the MinGW toolchain is strictly tied to the particular component versions, so the compatibility for it should not change.
 *** Msys2
+**** 28.2
+**** 28.1
 **** 27.2
 **** 27.1
 **** 26.3
-For this and older you need to add "LDFLAGS=-Wl,--disable-dynamicbase,--disable-high-entropy-va,--default-image-base-low" into mwb-configurations configure-env for a 64 bit build and "LDFLAGS=-Wl,--disable-dynamicbase" for 32 bit.  This is due to msys2 enabling ASLR by default since binutils 2.36 and this breaks Emacs unexec.  Alternatively you can downgrade binutils to 2.35 or older.
+For this and older you need to add ~LDFLAGS=-Wl,--disable-dynamicbase,--disable-high-entropy-va,--default-image-base-low~ into ~mwb-configurations~ ~configure-env~ for a 64 bit build and ~LDFLAGS=-Wl,--disable-dynamicbase~ for 32 bit.  This is due to msys2 enabling ASLR by default since binutils 2.36 and this breaks Emacs unexec.  Alternatively you can downgrade binutils to 2.35 or older.
 **** 26.2
 **** 26.1
 **** 25.3
@@ -105,13 +107,15 @@ For this and older you need to add "LDFLAGS=-Wl,--disable-dynamicbase,--disable-
 **** 24.5
 Msys2 now reports a host system incompatible with the 24.5 sources.  Hence you need to patch configure.ac file, replacing "mingw32" with "mingw*" on lines 625 and 1264.
 
-Furthermore you need to add -D_FORTIFY_SOURCE=0 to CFLAGS for the appropriate configuration in mwb-configurations.
+Furthermore you need to add ~-D_FORTIFY_SOURCE=0~ to CFLAGS for the appropriate configuration in mwb-configurations.
 
 If you are using a configuration with optimization enabled, make sure you set instal-strip to nil, because stripping breaks binaries for this version.
 
-For a 32 bit build make sure you remove --with-wide-int from your configuration.
+For a 32 bit build make sure you remove ~--with-wide-int~ from your configuration.
 **** 24.4
 *** MingGW
+**** 28.2
+**** 28.1
 **** 27.2
 **** 27.1
 **** 26.3
@@ -123,9 +127,11 @@ For this and older you need to enable the use of the older, sourceforge-only, Mi
 **** 25.1
 For this version and older you need to enable the use of the older dependencies in the config file.
 **** 24.5
-When building this and older remove --with-wide-int from the configuration you're using in mwb-configurations.  You also should not use any configuration that combines optimization(-O > 0) and debug info(-gdwarfX, -gX), since this results in corrupted binaries.
+When building this and older remove ~--with-wide-int~ from the configuration you're using in mwb-configurations.  You also should not use any configuration that combines optimization(-O > 0) and debug info(-gdwarfX, -gX), since this results in corrupted binaries.
 **** 24.4
 *** Cygwin
+**** 28.2
+**** 28.1
 **** 27.2
 **** 27.1
 **** 26.3

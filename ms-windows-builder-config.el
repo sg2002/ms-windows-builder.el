@@ -152,14 +152,14 @@ Currently it only allows to limit use of specific arguments by toolchains."
     ("https://sourceforge.net/projects/ezwinports/files/"
      ("automake-1.11.6-msys-bin.zip"
       "autoconf-2.65-msys-bin.zip"
-      "texinfo-6.8-3-w32-bin.zip"))))
+      "texinfo-7.0.1-w32-bin.zip"))))
 
 (defvar mwb-mingw-packages
   '(("https://osdn.net/projects/mingw/downloads/"
      ("70619/binutils-2.32-1-mingw32-bin.tar.xz"
-      "73378/mingwrt-5.4.1-mingw32-dll.tar.xz"
-      "73378/mingwrt-5.4.1-mingw32-dev.tar.xz"
-      "73379/w32api-5.4.1-mingw32-dev.tar.xz"
+      "74925/mingwrt-5.4.2-mingw32-dll.tar.xz"
+      "74925/mingwrt-5.4.2-mingw32-dev.tar.xz"
+      "74926/w32api-5.4.2-mingw32-dev.tar.xz"
       "72200/libmpc-1.1.0-1-mingw32-dll-3.tar.xz"
       "72198/libmpfr-4.0.2-1-mingw32-dll-6.tar.xz"
       "69295/libgmp-6.1.2-3-mingw32-dll-10.tar.xz"
@@ -313,7 +313,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
 ;;       "librsvg-2.40.1-2-w32-bin.zip"))))
 
 
-(defvar mwb-msys2-x64-packages '("base-devel" "mingw-w64-x86_64-toolchain"
+(defvar mwb-msys2-x64-packages '("base-devel" "autotools" "mingw-w64-x86_64-toolchain"
                                  "mingw-w64-x86_64-libxml2" "mingw-w64-x86_64-gnutls"
                                  "mingw-w64-x86_64-xpm-nox" "mingw-w64-x86_64-libtiff"
                                  "mingw-w64-x86_64-giflib" "mingw-w64-x86_64-libpng"
@@ -321,9 +321,9 @@ Currently it only allows to limit use of specific arguments by toolchains."
 				 "mingw-w64-x86_64-harfbuzz" "mingw-w64-x86_64-jansson"))
 
 (defvar mwb-msys2-x64-dist
-  "https://sourceforge.net/projects/msys2/files/Base/msys2-x86_64-latest.tar.xz")
+  "https://repo.msys2.org/distrib/msys2-x86_64-latest.tar.xz")
 
-(defvar mwb-msys2-x32-packages '("base-devel" "mingw-w64-i686-toolchain"
+(defvar mwb-msys2-x32-packages '("base-devel" "autotools" "mingw-w64-i686-toolchain"
                                  "mingw-w64-i686-libxml2" "mingw-w64-i686-gnutls"
                                  "mingw-w64-i686-xpm-nox" "mingw-w64-i686-libtiff"
                                  "mingw-w64-i686-giflib" "mingw-w64-i686-libpng"
@@ -331,7 +331,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
 				 "mingw-w64-i686-harfbuzz" "mingw-w64-x86_64-jansson"))
 
 (defvar mwb-msys2-x32-dist
-  "https://sourceforge.net/projects/msys2/files/Base/msys2-i686-latest.tar.xz")
+  "https://repo.msys2.org/distrib/msys2-i686-latest.tar.xz")
 
 (defvar mwb-cygwin-x64-dist
   "https://cygwin.com/setup-x86_64.exe")
@@ -358,7 +358,10 @@ Currently it only allows to limit use of specific arguments by toolchains."
     "png.*\\.dll" ; Png images, also required by harfbuzz, libcroco and libgdk_pixbuf
     ;; Harfbuzz
     "\\(cyg\\|lib\\)bz2-.*\\.dll"  "\\(cyg\\|lib\\)freetype-.*\\.dll" "\\(cyg\\|lib\\)glib-.*\\.dll"
-    "\\(cyg\\|lib\\)graphite.*\\.dll" "\\(cyg\\|lib\\)harfbuzz-.\\.dll" "\\(cyg\\|lib\\)pcre-.*\\.dll"
+    "\\(cyg\\|lib\\)graphite.*\\.dll" "\\(cyg\\|lib\\)harfbuzz-.\\.dll"
+    ;; Explicitly grab one particular version of libpcre we want for Msys2 to avoid grabbing others.
+    ;; pcre is not needed for MingGW.
+    "libpcre2-8-0.dll"
     "\\(cyg\\|lib\\)stdc\\+\\+-.*\\.dll" ; All of the above is also required for svg
     "iconv-.*\\.dll" "intl-.*\\.dll" ; Also used by gnutls
     ;; Official binaries work without those two somehow.
@@ -372,12 +375,16 @@ Currently it only allows to limit use of specific arguments by toolchains."
     "xml2-.*\\.dll"
     ;; Gnutls
     "gnutls-[0-9].\\.dll" "hogweed-.*\\.dll" "idn.*\\.dll"
+    "libbrotlienc.dll"
     "nettle-.*\\.dll" "p11-kit-.\\.dll" "tasn1-.*\\.dll"
     "libunistring-.*\\.dll"
     "gif-.*\\.dll" ; gif images
     "\\(cyg\\|lib\\)jpeg-.*\\.dll" ; jpeg images
-    "libdeflate\\.dll" "libwebp-.*\\.dll" "libzstd\\.dll" "tiff-.*\\.dll" ; tiff images
-    "Xpm-noX.*\\.dll" ; xpm images
+    ;; tiff images
+    "libjbig-.*\\.dll" "libdeflate\\.dll" "libLerc\\.dll"
+    "libwebp-.*\\.dll" "libzstd\\.dll" "tiff-.*\\.dll"
+    ;; xpm images
+    "Xpm-noX.*\\.dll"
     ;; svg images
     "\\(cyg\\|lib\\)gmodule-.*\\.dll" "\\(cyg\\|lib\\)gio-.*\\.dll"
     "\\(cyg\\|lib\\)gobject-.*\\.dll" ; Needed for cygwin harfbuzz too, but not for other toolchains.
@@ -389,17 +396,11 @@ Currently it only allows to limit use of specific arguments by toolchains."
   "Dynamic libraries to copy into the installation dir.")
 
 (defcustom mwb-cygwin-dynamic-libraries
-  '("cyggcc_s-.*\\.dll"
-    "cygwin.*\\.dll"
-    "cygz.dll"
-    "cygncursesw.*\\.dll"
-    "cygunistring-.*\\.dll"
-    "cygjbig-.*\\.dll"
-    "cygX11-.*\\.dll"
-    "cygxcb-.*\\.dll"
-    "cygXau-.*\\.dll"
-    "cygXdmcp-.*\\.dll"
-    "cygdeflate-.*\\.dll" "cygwebp-.*\\.dll" "cygzstd-.*\\.dll")
+  '("cygdeflate-.*\\.dll" "cyggcc_s-.*\\.dll" "cygjbig-.*\\.dll"
+    "cygncursesw.*\\.dll" "cygpcre-.*\\.dll" "cygsharpyuv-.*\\.dll"
+    "cygunistring-.*\\.dll" "cygwebp-.*\\.dll" "cygwin.*\\.dll"
+    "cygX11-.*\\.dll" "cygXau-.*\\.dll" "cygxcb-.*\\.dll"
+    "cygXdmcp-.*\\.dll" "cygz.dll" "cygzstd-.*\\.dll")
   "Dynamic libraries to copy into the installation dir during cygwin builds.")
 
 (defcustom mwb-msys2-dynamic-libraries
