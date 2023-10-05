@@ -79,6 +79,8 @@ Harfbuzz and GMP currently does not work for MinGW.
 
 If you have MinGW already installed and try to use the same location, but it does not have all of the required components, the build would break.  You can manually install components into an existing directory using ~(mwb-mingw-install-packages)~.  This script assumes that your Msys is installed within the MinGW tree.  Otherwise, installing a different MinGW using this script is highly recommended.
 *** Cygwin
+Cygwin no longer officially suports 32 bit architecture, so the last working snapshot is used for 32 bit builds.
+
 Cygwin builds are done ~--with-w32~, harfbuzz does not work and there is no svg image support.
 
 The build would break if you have Cygwin already installed and try to use the same location, but it does not have all of the required components.  You can manually install packages into an existing Cygwin installation by evaluating ~(mwb-cygwin-install 'x32)~ for x32 and ~(mwb-cygwin-install 'x64)~ for x64.
@@ -93,6 +95,7 @@ For Msys2 it should install all of the required packages, you can also force the
 ** Compatibility
 This script was tested for each toolchain building the following Emacs versions.  The latest versions are installed for most of the toolchain components, so you can expect this info to be wrong due to possible future versions breaking the builds.  Only the MinGW toolchain is strictly tied to the particular component versions, so the compatibility for it should not change.
 *** Msys2
+**** 29.1
 **** 28.2
 **** 28.1
 **** 27.2
@@ -114,6 +117,7 @@ If you are using a configuration with optimization enabled, make sure you set in
 For a 32 bit build make sure you remove ~--with-wide-int~ from your configuration.
 **** 24.4
 *** MingGW
+**** 29.1
 **** 28.2
 **** 28.1
 **** 27.2
@@ -130,6 +134,7 @@ For this version and older you need to enable the use of the older dependencies 
 When building this and older remove ~--with-wide-int~ from the configuration you're using in mwb-configurations.  You also should not use any configuration that combines optimization(-O > 0) and debug info(-gdwarfX, -gX), since this results in corrupted binaries.
 **** 24.4
 *** Cygwin
+**** 29.1
 **** 28.2
 **** 28.1
 **** 27.2

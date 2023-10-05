@@ -503,9 +503,6 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
   "Convert path PATH to MinGW format.  c:/Emacs would become /c/Emacs."
   (concat "/cygdrive/" (replace-regexp-in-string ":" "" path)))
 
-(defvar mwb-cygwin-install-extra-args ()
-  "Extra arguments to pass to Cygwin installer.")
-
 (defun mwb-cygwin-install (x &optional k)
   "Install cygwin. If X is 'x32, install 32 bit version."
   (let* ((k (if k k (mwb-start)))
@@ -519,9 +516,10 @@ SOURCE-PACKAGES should have the common download path as car and the list of pack
               (start-file-process-shell-command
                "mwb" (mwb-get-buffer)
                (concat installer " "
-		       (combine-and-quote-strings mwb-cygwin-install-extra-args)
+		       (combine-and-quote-strings (if install-x32 mwb-cygwin-install-x32-extra-args
+						    mwb-cygwin-install-extra-args))
 		       " -q -n -B -l \"" mwb-wget-download-directory
-                       "\" -s \"" mwb-cygwin-site
+                       "\" -s \"" (if install-x32 mwb-cygwin-x32-site mwb-cygwin-site)
                        "\" -R \"" (replace-regexp-in-string "/" "\\\\" dir)
                        "\" -P " (mapconcat 'identity mwb-cygwin-packages ",")))))
          (set-process-sentinel process (mwb-get-sentinel k)))))))

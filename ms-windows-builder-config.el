@@ -339,8 +339,18 @@ Currently it only allows to limit use of specific arguments by toolchains."
 (defvar mwb-cygwin-x32-dist
   "https://cygwin.com/setup-x86.exe")
 
+(defvar mwb-cygwin-install-extra-args ()
+  "Extra arguments to pass to Cygwin installer.")
+
+(defvar mwb-cygwin-install-x32-extra-args
+  '("--allow-unsupported-windows option")
+  "Extra arguments to pass to 32 bit Cygwin installer.")
+
 (defvar mwb-cygwin-site
   "http://mirrors.kernel.org/sourceware/cygwin/")
+
+(defvar mwb-cygwin-x32-site
+  "http://ctm.crouchingtigerhiddenfruitbat.org/pub/cygwin/circa/2022/11/23/063457")
 
 (defvar mwb-cygwin-packages
   '("automake" "autoconf" "make" "gcc-core" "libgnutls-devel"
@@ -398,7 +408,8 @@ Currently it only allows to limit use of specific arguments by toolchains."
 (defcustom mwb-cygwin-dynamic-libraries
   '("cygdeflate-.*\\.dll" "cyggcc_s-.*\\.dll" "cygjbig-.*\\.dll"
     "cygncursesw.*\\.dll" "cygpcre-.*\\.dll" "cygsharpyuv-.*\\.dll"
-    "cygunistring-.*\\.dll" "cygwebp-.*\\.dll" "cygwin.*\\.dll"
+    "cygunistring-.*\\.dll" "cygwebp-.*\\.dll" "cygwebpdemux-.*\\.dll"
+    "cygwebpdecoder-.*\\.dll" "cygwin.*\\.dll"
     "cygX11-.*\\.dll" "cygXau-.*\\.dll" "cygxcb-.*\\.dll"
     "cygXdmcp-.*\\.dll" "cygz.dll" "cygzstd-.*\\.dll")
   "Dynamic libraries to copy into the installation dir during cygwin builds.")
