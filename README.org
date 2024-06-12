@@ -58,6 +58,8 @@ c:\cygwin64\bin\run.exe emacs-27.1.exe
 #+end_src
 ** Emacs optional feature checklist
 To ensure that everything possible is working in your Emacs build, you should check for the presence of the following features.
+*** sqlite
+Evaluating ~(sqlite-available-p)~ should return a non-nil value.
 *** harfbuzz
 Evaluating ~(frame-parameter nil 'font-backend)~ should return harfbuzz first.  Emacs is using harfbuzz since 27.1.
 *** gnutls
@@ -95,6 +97,8 @@ For Msys2 it should install all of the required packages, you can also force the
 ** Compatibility
 This script was tested for each toolchain building the following Emacs versions.  The latest versions are installed for most of the toolchain components, so you can expect this info to be wrong due to possible future versions breaking the builds.  Only the MinGW toolchain is strictly tied to the particular component versions, so the compatibility for it should not change.
 *** Msys2
+**** 29.3
+**** 29.2
 **** 29.1
 **** 28.2
 **** 28.1
@@ -117,6 +121,8 @@ If you are using a configuration with optimization enabled, make sure you set in
 For a 32 bit build make sure you remove ~--with-wide-int~ from your configuration.
 **** 24.4
 *** MingGW
+**** 29.3
+**** 29.2
 **** 29.1
 **** 28.2
 **** 28.1
@@ -134,6 +140,8 @@ For this version and older you need to enable the use of the older dependencies 
 When building this and older remove ~--with-wide-int~ from the configuration you're using in mwb-configurations.  You also should not use any configuration that combines optimization(-O > 0) and debug info(-gdwarfX, -gX), since this results in corrupted binaries.
 **** 24.4
 *** Cygwin
+**** 29.3
+**** 29.2
 **** 29.1
 **** 28.2
 **** 28.1

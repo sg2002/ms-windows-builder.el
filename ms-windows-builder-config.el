@@ -199,7 +199,8 @@ Currently it only allows to limit use of specific arguments by toolchains."
       "libcroco-0.6.8-w32-bin.zip"
       "gdk-pixbuf-2.30.2-w32-bin.zip"
       "pango-1.36.1-2-w32-bin.zip"
-      "librsvg-2.40.1-2-w32-bin.zip"))
+      "librsvg-2.40.1-2-w32-bin.zip"
+      "sqlite3-3.37.0-w32-bin.zip"))
     ("https://osdn.net/projects/mingw/downloads/"
      (;; New GCC needs a fresher libintl, than the one that's
       ;; provided with some ezwinports packages, so we override it.
@@ -318,7 +319,8 @@ Currently it only allows to limit use of specific arguments by toolchains."
                                  "mingw-w64-x86_64-xpm-nox" "mingw-w64-x86_64-libtiff"
                                  "mingw-w64-x86_64-giflib" "mingw-w64-x86_64-libpng"
                                  "mingw-w64-x86_64-libjpeg-turbo" "mingw-w64-x86_64-librsvg"
-				 "mingw-w64-x86_64-harfbuzz" "mingw-w64-x86_64-jansson"))
+				 "mingw-w64-x86_64-harfbuzz" "mingw-w64-x86_64-jansson"
+				 "libsqlite-devel"))
 
 (defvar mwb-msys2-x64-dist
   "https://repo.msys2.org/distrib/msys2-x86_64-latest.tar.xz")
@@ -328,7 +330,8 @@ Currently it only allows to limit use of specific arguments by toolchains."
                                  "mingw-w64-i686-xpm-nox" "mingw-w64-i686-libtiff"
                                  "mingw-w64-i686-giflib" "mingw-w64-i686-libpng"
                                  "mingw-w64-i686-libjpeg-turbo" "mingw-w64-i686-librsvg"
-				 "mingw-w64-i686-harfbuzz" "mingw-w64-x86_64-jansson"))
+				 "mingw-w64-i686-harfbuzz" "mingw-w64-x86_64-jansson"
+				 "libsqlite-devel"))
 
 (defvar mwb-msys2-x32-dist
   "https://repo.msys2.org/distrib/msys2-i686-latest.tar.xz")
@@ -356,7 +359,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
   '("automake" "autoconf" "make" "gcc-core" "libgnutls-devel"
     "libncurses-devel" "libgif-devel" "libjpeg-devel" "libpng-devel"
     "libtiff-devel" "libX11-devel" "libXpm-noX-devel" "libxml2-devel" "libiconv-devel"
-    "libjansson-devel" "libharfbuzz-devel"))
+    "libjansson-devel" "libharfbuzz-devel" "libsqlite3-devel"))
 
 (defcustom mwb-dynamic-libraries
   '(;; libwinpthread is needed for msys2 only, it can be linked statically
@@ -385,7 +388,7 @@ Currently it only allows to limit use of specific arguments by toolchains."
     "xml2-.*\\.dll"
     ;; Gnutls
     "gnutls-[0-9].\\.dll" "hogweed-.*\\.dll" "idn.*\\.dll"
-    "libbrotlienc.dll"
+    "\\(cyg\\|lib\\)brotlienc.*\\.dll"
     "nettle-.*\\.dll" "p11-kit-.\\.dll" "tasn1-.*\\.dll"
     "libunistring-.*\\.dll"
     "gif-.*\\.dll" ; gif images
@@ -402,7 +405,9 @@ Currently it only allows to limit use of specific arguments by toolchains."
     "libdatrie-1.dll" "libexpat-.*\\.dll" "ffi-.*\\.dll" "libfontconfig-.*\\.dll" "libfribidi-.*\\.dll"
     "libgdk_pixbuf-.*\\.dll"  "libpango-.*\\.dll" "libpangoft.*\\.dll"
     "libpangowin32-.*\\.dll" "libpangocairo-.*\\.dll"
-    "libpixman-.*\\.dll" "librsvg-.*\\.dll" "libthai-.*\\.dll")
+    "libpixman-.*\\.dll" "librsvg-.*\\.dll" "libthai-.*\\.dll"
+    "\\(cyg\\|lib\\)sqlite.*\\.dll" ; MinGW build works without it copied for some reason
+    )
   "Dynamic libraries to copy into the installation dir.")
 
 (defcustom mwb-cygwin-dynamic-libraries
