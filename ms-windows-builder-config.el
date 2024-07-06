@@ -64,15 +64,19 @@
   :type 'directory)
 
 (defcustom mwb-configurations
+  ;; -Wno-error=implicit-function-declaration is added because msys2 now ships
+  ;; gcc14 and that by default treats implicit function declarations as errors
+  ;; see https://debbugs.gnu.org/cgi/bugreport.cgi?bug=70889
+  ;; This is already done in configure for Emacs > 29, don't have to set it there
   '((debug
-     ((configure-env ("CFLAGS=-O0 -gdwarf-4 -g3"))
+     ((configure-env ("CFLAGS=-O0 -gdwarf-4 -g3 -Wno-error=implicit-function-declaration"))
       (configure-args ("--without-imagemagick"
                        "--with-wide-int"
                        "--with-w32"
                        "--enable-checking='yes,glyphs'"
                        "--enable-check-lisp-object-type"))))
     (debug-with-modules
-     ((configure-env ("CFLAGS=-O0 -gdwarf-4 -g3"))
+     ((configure-env ("CFLAGS=-O0 -gdwarf-4 -g3 -Wno-error=implicit-function-declaration"))
       (configure-args ("--without-imagemagick"
                        "--with-wide-int"
                        "--with-w32"
@@ -80,13 +84,13 @@
                        "--enable-check-lisp-object-type"
                        "--with-modules"))))
     (release
-     ((configure-env ("CFLAGS=-O2"))
+     ((configure-env ("CFLAGS=-O2 -Wno-error=implicit-function-declaration"))
       (configure-args ("--without-imagemagick"
                        "--with-wide-int"
                        "--with-w32"))
       (install-strip t)))
     (release-with-modules
-     ((configure-env ("CFLAGS=-O2"))
+     ((configure-env ("CFLAGS=-O2 -Wno-error=implicit-function-declaration"))
       (configure-args ("--without-imagemagick"
                        "--with-wide-int"
                        "--with-w32"
